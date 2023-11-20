@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class EntityIdNotFoundException extends Exception {
+public class EntityIdNotFoundException extends RuntimeException {
 
     public EntityIdNotFoundException() {
         super();
