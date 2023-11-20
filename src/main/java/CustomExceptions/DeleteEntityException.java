@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class DeleteEntityException extends Exception {
+public class DeleteEntityException extends RuntimeException {
     public DeleteEntityException() {
         super();
     }

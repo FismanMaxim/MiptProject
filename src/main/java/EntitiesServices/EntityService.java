@@ -13,7 +13,7 @@ public abstract class EntityService<T extends StoredById> {
         this.repository = repository;
     }
 
-    public T getById(long id) throws GetEntityException {
+    public T getById(long id) {
         try {
             return repository.getById(id);
         } catch (EntityIdNotFoundException e) {
@@ -21,7 +21,7 @@ public abstract class EntityService<T extends StoredById> {
         }
     }
 
-    public <T_DTO extends EntityDTO<T>> long create(T_DTO objDTO) throws CreateEntityException {
+    public <T_DTO extends EntityDTO<T>> long create(T_DTO objDTO) {
         long id = repository.generateId();
         T obj = objDTO.convertToTargetObject(id);
         try {
@@ -33,7 +33,7 @@ public abstract class EntityService<T extends StoredById> {
         return id;
     }
 
-    public void update(T obj) throws UpdateEntityException {
+    public void update(T obj) {
         try {
             repository.update(obj);
         } catch (EntityIdNotFoundException e) {
@@ -41,7 +41,7 @@ public abstract class EntityService<T extends StoredById> {
         }
     }
 
-    public void delete(long id) throws DeleteEntityException {
+    public void delete(long id) {
         try {
             repository.delete(id);
         } catch (EntityIdNotFoundException e) {

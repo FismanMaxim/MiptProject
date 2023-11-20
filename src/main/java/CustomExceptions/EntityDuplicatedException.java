@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class EntityDuplicatedException extends Exception {
+public class EntityDuplicatedException extends RuntimeException {
     public EntityDuplicatedException() {
         super();
     }

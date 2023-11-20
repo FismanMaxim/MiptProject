@@ -1,8 +1,6 @@
 package EntitiesServices;
 
-import CustomExceptions.EntityIdNotFoundException;
 import CustomExceptions.NegativeMoneyException;
-import CustomExceptions.NegativeSharesException;
 import Entities.User;
 import EntitiesRepositories.EntityRepository;
 import Requests.ShareDelta;
@@ -15,8 +13,7 @@ public class UserService extends EntityService<User> {
         super(repository);
     }
 
-    public void updateMoney(long id, double deltaMoney)
-            throws EntityIdNotFoundException, NegativeMoneyException {
+    public void updateMoney(long id, double deltaMoney) {
         User user = repository.getById(id);
         double userMoney = user.getMoney() + deltaMoney;
 
@@ -27,14 +24,13 @@ public class UserService extends EntityService<User> {
         repository.update(user);
     }
 
-    public void updateName(long id, String newName) throws EntityIdNotFoundException {
+    public void updateName(long id, String newName) {
         User user = repository.getById(id);
         user = user.withName(newName);
         repository.update(user);
     }
 
-    public void updateShares(long id, List<ShareDelta> sharesDelta)
-            throws EntityIdNotFoundException, NegativeSharesException {
+    public void updateShares(long id, List<ShareDelta> sharesDelta) {
         User user = repository.getById(id);
         user = user.withSharesDelta(sharesDelta);
         repository.update(user);

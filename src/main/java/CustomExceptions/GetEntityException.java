@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class GetEntityException extends Exception {
+public class GetEntityException extends RuntimeException {
     public GetEntityException() {
     }
 

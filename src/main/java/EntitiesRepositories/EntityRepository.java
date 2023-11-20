@@ -23,26 +23,26 @@ public interface EntityRepository<T extends StoredById> {
      * @return Returns the object with the given id
      * @throws EntityIdNotFoundException if the repository contains no object with the given id
      */
-    T getById(long id) throws EntityIdNotFoundException;
+    T getById(long id);
 
     /**
      * Creates a new object in the repository with corresponding fields
      * @param obj The object to create
      * @throws EntityDuplicatedException if the repository already contains an object with the same id as obj
      */
-    void create(T obj) throws EntityDuplicatedException;
+    void create(T obj);
 
     /**
      * Updates an object in the repository
      * @param obj Information about the object to be updated
      * @throws EntityIdNotFoundException If the object with corresponding id was not found
      */
-    void update(T obj) throws EntityIdNotFoundException;
+    void update(T obj);
 
     /**
      * Deletes an object with the given id from the repository
      * @param id The id of the object to delete
      * @throws EntityIdNotFoundException If the repository contains no object with the given id
      */
-    void delete(long id) throws EntityIdNotFoundException;
+    void delete(long id);
 }

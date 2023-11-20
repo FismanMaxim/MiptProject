@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class NegativeSharesException extends Exception {
+public class NegativeSharesException extends RuntimeException {
     public NegativeSharesException() {
         super();
     }

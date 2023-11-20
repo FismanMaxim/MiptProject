@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class NegativeMoneyException extends Exception {
+public class NegativeMoneyException extends RuntimeException {
     public NegativeMoneyException() {
         super();
     }

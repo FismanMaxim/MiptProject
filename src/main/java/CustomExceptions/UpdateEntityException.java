@@ -1,6 +1,6 @@
 package CustomExceptions;
 
-public class UpdateEntityException extends Exception {
+public class UpdateEntityException extends RuntimeException {
     public UpdateEntityException() {
         super();
     }

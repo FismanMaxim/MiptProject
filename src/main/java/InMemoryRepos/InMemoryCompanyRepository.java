@@ -27,7 +27,7 @@ public class InMemoryCompanyRepository implements EntityRepository<Company> {
     }
 
     @Override
-    public Company getById(long id) throws EntityIdNotFoundException {
+    public Company getById(long id) {
         Company company = companies.get(id);
         if (company == null)
             throw new EntityIdNotFoundException();
@@ -35,21 +35,21 @@ public class InMemoryCompanyRepository implements EntityRepository<Company> {
     }
 
     @Override
-    public synchronized void create(Company company) throws EntityDuplicatedException {
+    public synchronized void create(Company company) {
         if (companies.get(company.getId()) != null)
             throw new EntityDuplicatedException();
         companies.put(company.getId(), company);
     }
 
     @Override
-    public synchronized void update(Company company) throws EntityIdNotFoundException {
+    public synchronized void update(Company company) {
         if (companies.get(company.getId()) == null)
             throw new EntityIdNotFoundException();
         companies.put(company.getId(),  company);
     }
 
     @Override
-    public void delete(long id) throws EntityIdNotFoundException {
+    public void delete(long id) {
         if (companies.remove(id) == null)
             throw new EntityIdNotFoundException();
     }
