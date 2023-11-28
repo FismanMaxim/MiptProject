@@ -18,7 +18,7 @@ public class Database {
     String password = "mypassword";
     Connection connection;
 
-    Database() {
+    public Database() {
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (SQLException e) {
@@ -26,9 +26,25 @@ public class Database {
                     " password and or url");
         }
     }
+    public Database(Connection connection){
+        this.connection = connection;
+    }
 
-    class InMemoryUser {
-        User getById(long id) {
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void dropConnection() {
+        try {
+            connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class InMemoryUser {
+        public User getById(long id) {
 
             try {
                 String selectUserByIdQuery = "SELECT id, name, money FROM users WHERE id = ?";
@@ -59,7 +75,7 @@ public class Database {
             }
         }
 
-        void create(User user) {
+        public void create(User user) {
 
             // SQL-запрос для добавления пользователя
             String insertUserQuery = "INSERT INTO users (id, name, money, shares) VALUES (?, ?, ?, ?)";
@@ -89,7 +105,7 @@ public class Database {
             }
         }
 
-        void update(User user) {
+        public void update(User user) {
             // SQL-запрос для обновления пользователя
             String updateUserQuery = "UPDATE users SET name = ?, money = ?, shares = ? WHERE id = ?";
 
@@ -118,7 +134,7 @@ public class Database {
             }
         }
 
-        void delete(long id) {
+        public void delete(long id) {
             String deleteUserQuery = "DELETE FROM users WHERE id = ?";
 
             try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
@@ -142,7 +158,7 @@ public class Database {
         }
     }
 
-    class InMemoryCompany {
+    public class InMemoryCompany {
         public List<Company> getAll() {
             List<Company> companies = new ArrayList<>();
 
@@ -308,7 +324,7 @@ public class Database {
 
         // Наличие этой функции показывает огромный уровень доверия в нашей
         // команде
-        void addUsersToCompany(long companyId, Set<User> users) {
+        public void addUsersToCompany(long companyId, Set<User> users) {
             try {
                 // SQL-запрос для получения компании по ID
                 String getCompanyByIdQuery = "SELECT users FROM companies WHERE " +
