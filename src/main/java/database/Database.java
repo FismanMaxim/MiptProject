@@ -156,21 +156,22 @@ public class Database {
         public void delete(long id) {
             String deleteUserQuery = "DELETE FROM users WHERE id = ?";
 
-            try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
+            try {
                 // Создание PreparedStatement для выполнения запроса
-                try (PreparedStatement preparedStatement = connection.prepareStatement(deleteUserQuery)) {
-                    // Установка значения параметра
-                    preparedStatement.setLong(1, id);
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(deleteUserQuery);
+                // Установка значения параметра
+                preparedStatement.setLong(1, id);
 
-                    // Выполнение запроса
-                    int rowsAffected = preparedStatement.executeUpdate();
+                // Выполнение запроса
+                int rowsAffected = preparedStatement.executeUpdate();
 
-                    if (rowsAffected > 0) {
-                        System.out.println("User deleted successfully.");
-                    } else {
-                        System.out.println("User not found or deletion failed.");
-                    }
+                if (rowsAffected > 0) {
+                    System.out.println("User deleted successfully.");
+                } else {
+                    System.out.println("User not found or deletion failed.");
                 }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
