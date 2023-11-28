@@ -2,8 +2,11 @@ import Entities.Company;
 import Entities.User;
 import database.Database;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,7 +30,20 @@ public class DatabaseTest {
         // You might want to move this to an @AfterEach method if you're using JUnit 4
         database.dropConnection();
     }
+    @AfterEach
+public void clearing(){
+    try {
 
+        database.connection.prepareStatement("delete from users where id != " +
+                "-3").execute();
+        database.connection.prepareStatement("delete from companies where id != " +
+                "-3").execute();
+    }
+    catch (SQLException e){
+        e.printStackTrace();
+    }
+
+}
     @Test
     public void testInMemoryUserGetById() {
         // Create a user and add it to the database
@@ -132,7 +148,8 @@ public class DatabaseTest {
         users.add(user2);
 
         database.new InMemoryCompany().addUsersToCompany(3, users);
-
+        database.new InMemoryUser().create(user1);
+        database.new InMemoryUser().create(user2);
         // Retrieve the updated company
         Company updatedCompany = database.new InMemoryCompany().getById(3);
 

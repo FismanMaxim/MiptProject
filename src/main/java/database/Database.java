@@ -3,12 +3,10 @@ package database;
 import Entities.Company;
 import Entities.User;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-import org.postgresql.*;
 import org.postgresql.core.Encoding;
 import org.postgresql.util.HStoreConverter;
 
@@ -16,7 +14,7 @@ public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
     String username = "postgres";
     String password = "mypassword";
-    Connection connection;
+    public Connection connection;
 
     public Database() {
         try {
@@ -26,7 +24,18 @@ public class Database {
                     " password and or url");
         }
     }
-    public Database(Connection connection){
+
+    private String Hstoryfy(Map<Long, Integer> map) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (var i : map.entrySet()) {
+            stringBuilder.append(String.format("'\"%s\"=>\"%s\"',",
+                    i.getKey().toString()
+                    , i.getValue().toString()));
+        }
+        return stringBuilder.toString();
+    }
+
+    public Database(Connection connection) {
         this.connection = connection;
     }
 
@@ -47,7 +56,8 @@ public class Database {
         public User getById(long id) {
 
             try {
-                String selectUserByIdQuery = "SELECT id, name, money FROM users WHERE id = ?";
+                String selectUserByIdQuery = "SELECT id, name, money, shares " +
+                        "FROM users WHERE id = ?";
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(selectUserByIdQuery);
                 // Установка значения параметра (замените user_id на конкретный идентификатор пользователя)
@@ -58,8 +68,14 @@ public class Database {
                 if (resultSet.next()) {
                     String name = resultSet.getString("name");
                     int money = resultSet.getInt("money");
-                    var shares =
-                            HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+
+                    Map<String, String> shares;
+                    try {
+                        shares =
+                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        shares = new HashMap<>();
+                    }
                     Map<Long, Integer> sharesConverted = new HashMap<>();
                     for (var keys : shares.entrySet()) {
                         sharesConverted.put(Long.getLong(keys.getKey()),
@@ -80,26 +96,23 @@ public class Database {
             // SQL-запрос для добавления пользователя
             String insertUserQuery = "INSERT INTO users (id, name, money, shares) VALUES (?, ?, ?, ?)";
 
-            try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-                // Создание PreparedStatement для выполнения запроса
-                try (PreparedStatement preparedStatement = connection.prepareStatement(insertUserQuery)) {
-                    // Установка значений параметров
-                    preparedStatement.setLong(1, user.getId());
-                    preparedStatement.setString(2, user.getUserName());
-                    preparedStatement.setDouble(3, user.getMoney());
-                    preparedStatement.setBytes(4,
-                            HStoreConverter.toBytes(user.getShares(),
-                                    Encoding.defaultEncoding()));
+            // Создание PreparedStatement для выполнения запроса
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertUserQuery)) {
+                // Установка значений параметров
+                preparedStatement.setLong(1, user.getId());
+                preparedStatement.setString(2, user.getUserName());
+                preparedStatement.setDouble(3, user.getMoney());
+                preparedStatement.setString(4, Hstoryfy(user.getShares()));
+                // Выполнение запроса
+                int rowsAffected =
+                        connection.prepareStatement(preparedStatement.toString()).executeUpdate();
 
-                    // Выполнение запроса
-                    int rowsAffected = preparedStatement.executeUpdate();
-
-                    if (rowsAffected > 0) {
-                        System.out.println("User added successfully.");
-                    } else {
-                        System.out.println("Failed to add user.");
-                    }
+                if (rowsAffected > 0) {
+                    System.out.println("User added successfully.");
+                } else {
+                    System.out.println("Failed to add user.");
                 }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -168,7 +181,7 @@ public class Database {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         long id = resultSet.getLong("id");
-                        String companyName = resultSet.getString("company_name");
+                        String companyName = resultSet.getString("name");
                         int totalShares = resultSet.getInt("total_shares");
                         int vacantShares = resultSet.getInt("vacant_shares");
                         float keyShareholderThreshold = resultSet.getFloat("key_shareholder_threshold");
@@ -196,27 +209,34 @@ public class Database {
             Set<User> users = new HashSet<>();
 
             // SQL-запрос для получения пользователей, связанных с компанией
-            String getUsersForCompanyQuery = "SELECT u.* FROM users u JOIN company_user cu ON u.id = cu.user_id WHERE cu.company_id = ?";
+            String getUsersForCompanyQuery = "SELECT companies.users from " +
+                    "companies " +
+                    " Where " +
+                    "companies.id = ?";
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(getUsersForCompanyQuery)) {
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getUsersForCompanyQuery);
                 preparedStatement.setLong(1, companyId);
 
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        long userId = resultSet.getLong("id");
-                        String userName = resultSet.getString("name");
-                        double userMoney = resultSet.getDouble("money");
-                        var shares =
-                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
-                        Map<Long, Integer> sharesConverted = new HashMap<>();
-                        for (var keys : shares.entrySet()) {
-                            sharesConverted.put(Long.getLong(keys.getKey()),
-                                    Integer.valueOf(keys.getValue()));
-                        }
-                        User user = new User(userId, userName, userMoney, sharesConverted);
-                        users.add(user);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    Set<Integer> users1;
+                    try {
+                        users1 = Set.of((Integer[]) resultSet.getArray(
+                                "users").getArray());
+                    } catch (NullPointerException e) {
+                        users1 = new HashSet<>();
                     }
+                    for (var i : users1) {
+                        users.add(new InMemoryUser().getById(i));
+                    }
+                } else {
+                    throw new IOException("no company (");
                 }
+
+            } catch (IOException | SQLException e) {
+                e.printStackTrace();
             }
             return users;
         }
@@ -232,10 +252,11 @@ public class Database {
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        String companyName = resultSet.getString("company_name");
+                        String companyName = resultSet.getString("name");
                         int totalShares = resultSet.getInt("total_shares");
                         int vacantShares = resultSet.getInt("vacant_shares");
-                        float keyShareholderThreshold = resultSet.getFloat("key_shareholder_threshold");
+                        int keyShareholderThreshold = resultSet.getInt(
+                                "key_shareholder_threshold");
                         long money = resultSet.getLong("money");
                         long sharePrice = resultSet.getLong("share_price");
 
@@ -257,14 +278,14 @@ public class Database {
         public synchronized void create(Company company) {
 
             // SQL-запрос для создания компании
-            String createCompanyQuery = "INSERT INTO companies (id, company_name, total_shares, vacant_shares, key_shareholder_threshold, money, share_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String createCompanyQuery = "INSERT INTO companies (id, name, total_shares, vacant_shares, key_shareholder_threshold, money, share_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(createCompanyQuery)) {
                 preparedStatement.setLong(1, company.getId());
                 preparedStatement.setString(2, company.getCompanyName());
                 preparedStatement.setInt(3, company.getTotalShares());
                 preparedStatement.setInt(4, company.getVacantShares());
-                preparedStatement.setFloat(5, company.getKeyShareholderThreshold());
+                preparedStatement.setInt(5, company.getKeyShareholderThreshold());
                 preparedStatement.setLong(6, company.getMoney());
                 preparedStatement.setLong(7, company.getSharePrice());
 
@@ -283,7 +304,7 @@ public class Database {
         public synchronized void update(Company company) {
 
             // SQL-запрос для обновления компании
-            String updateCompanyQuery = "UPDATE companies SET company_name = ?, total_shares = ?, vacant_shares = ?, key_shareholder_threshold = ?, money = ?, share_price = ? WHERE id = ?";
+            String updateCompanyQuery = "UPDATE companies SET name = ?, total_shares = ?, vacant_shares = ?, key_shareholder_threshold = ?, money = ?, share_price = ? WHERE id = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateCompanyQuery)) {
                 preparedStatement.setString(1, company.getCompanyName());
@@ -309,7 +330,8 @@ public class Database {
         private void updateUsersForCompany(Connection connection,
                                            long companyId, Set<User> users) throws SQLException {//todo
             // SQL-запрос для удаления текущих связей компании с пользователями
-            String deleteUsersForCompanyQuery = "DELETE FROM company_user WHERE company_id = ?";
+            String deleteUsersForCompanyQuery = "DELETE FROM companies " +
+                    "WHERE id = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(deleteUsersForCompanyQuery)) {
                 preparedStatement.setLong(1, companyId);
@@ -333,22 +355,32 @@ public class Database {
                         connection.prepareStatement(getCompanyByIdQuery);
                 preparedStatement.setLong(1, companyId);
                 ResultSet resultSet = preparedStatement.executeQuery();
-                Set<Integer> usersAlreadyIn =
-                        Set.of((Integer[]) resultSet.getArray(
-                                "users").getArray());
-                for (var i : users) {
-                    usersAlreadyIn.add((int) i.getId());
+                if (resultSet.next()) {
+                    Set<Integer> usersAlreadyIn;
+                    try {
+                        usersAlreadyIn =
+                                Set.of((Integer[]) resultSet.getArray(
+                                        "users").getArray());
+                    }
+                    catch (NullPointerException e){
+                        usersAlreadyIn = new HashSet<>();
+                    }
+                    for (var i : users) {
+                        usersAlreadyIn.add((int) i.getId());
+                    }
+                    // SQL-запрос для обновления компании
+                    String updateCompanyQuery = "UPDATE companies SET users = ? WHERE" +
+                            " id = ?";
+                    preparedStatement =
+                            connection.prepareStatement(updateCompanyQuery);
+                    preparedStatement.setLong(2, companyId);
+                    preparedStatement.setArray(1, connection.createArrayOf(
+                            "integer", usersAlreadyIn.toArray()));
+                    preparedStatement.execute();
+                } else {
+                    throw new IOException("no company id");
                 }
-                // SQL-запрос для обновления компании
-                String updateCompanyQuery = "UPDATE companies SET users = ? WHERE" +
-                        " id = ?";
-                preparedStatement =
-                        connection.prepareStatement(updateCompanyQuery);
-                preparedStatement.setLong(2, companyId);
-                preparedStatement.setArray(1, connection.createArrayOf(
-                        "integer", usersAlreadyIn.toArray()));
-                preparedStatement.execute();
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         }
