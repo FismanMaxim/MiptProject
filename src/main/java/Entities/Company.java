@@ -54,4 +54,11 @@ public class Company implements StoredById {
     public long getSharePrice() {
         return sharePrice;
     }
+    public List<Long> getUserIds(){
+        List<Long> list = new ArrayList<>();
+        for(var i:users){
+            list.add(i.getId());
+        }
+        return list;
+    }
 }
