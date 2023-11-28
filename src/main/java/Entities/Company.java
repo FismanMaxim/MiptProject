@@ -47,7 +47,9 @@ public class Company implements StoredById {
     public float getKeyShareholderThreshold() {
         return keyShareholderThreshold;
     }
-
+    public Set<User>getUsers(){
+        return Set.copyOf(users);
+    }
     public long getMoney() {
         return money;
     }
@@ -61,4 +63,5 @@ public class Company implements StoredById {
         }
         return list;
     }
+
 }
