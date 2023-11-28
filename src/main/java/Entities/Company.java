@@ -96,5 +96,11 @@ public class Company implements StoredById {
         }
         return list;
     }
-
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Company company = (Company) o;
+        return id == company.id;
+    }
 }

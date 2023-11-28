@@ -22,7 +22,6 @@ public class User implements StoredById {
         this.money = money;
         this.shares = shares;
     }
-
     @Override
     public long getId() {
         return id;
@@ -31,7 +30,6 @@ public class User implements StoredById {
     public String getUserName() {
         return userName;
     }
-
     public double getMoney() {
         return money;
     }

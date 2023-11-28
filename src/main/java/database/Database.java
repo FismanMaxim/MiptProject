@@ -85,7 +85,7 @@ public class Database {
                     return new User(id, name, money, sharesConverted);
                 } else {
                     System.out.println("User not found.");
-                    return new User(-1, "loh tsvetochnii", 0);
+                    return null;
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -98,15 +98,19 @@ public class Database {
             String insertUserQuery = "INSERT INTO users (id, name, money, shares) VALUES (?, ?, ?, ?)";
 
             // Создание PreparedStatement для выполнения запроса
-            try (PreparedStatement preparedStatement = connection.prepareStatement(insertUserQuery)) {
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
+                preparedStatement.setString(4,
+                        Hstoryfy(user.getShares()));
+                preparedStatement =
+                        connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
                 preparedStatement.setString(2, user.getUserName());
                 preparedStatement.setDouble(3, user.getMoney());
-                preparedStatement.setString(4, Hstoryfy(user.getShares()));
                 // Выполнение запроса
-                int rowsAffected =
-                        connection.prepareStatement(preparedStatement.toString()).executeUpdate();
+                int rowsAffected = preparedStatement.executeUpdate();
 
                 if (rowsAffected > 0) {
                     System.out.println("User added successfully.");
@@ -123,26 +127,27 @@ public class Database {
             // SQL-запрос для обновления пользователя
             String updateUserQuery = "UPDATE users SET name = ?, money = ?, shares = ? WHERE id = ?";
 
-            try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-                // Создание PreparedStatement для выполнения запроса
-                try (PreparedStatement preparedStatement = connection.prepareStatement(updateUserQuery)) {
-                    // Установка значений параметров
-                    preparedStatement.setString(1, user.getUserName());
-                    preparedStatement.setDouble(2, user.getMoney());
-                    preparedStatement.setBytes(3,
-                            HStoreConverter.toBytes(user.getShares(),
-                                    Encoding.defaultEncoding()));
-                    preparedStatement.setLong(4, user.getId());
+            // Создание PreparedStatement для выполнения запроса
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(updateUserQuery);
+                // Установка значений параметров
+                preparedStatement.setString(3, Hstoryfy(user.getShares()));
+                preparedStatement =
+                        connection.prepareStatement(preparedStatement.toString());
+                preparedStatement.setString(1, user.getUserName());
+                preparedStatement.setDouble(2, user.getMoney());
+                preparedStatement.setLong(3, user.getId());
 
-                    // Выполнение запроса
-                    int rowsAffected = preparedStatement.executeUpdate();
+                // Выполнение запроса
+                int rowsAffected = preparedStatement.executeUpdate();
 
-                    if (rowsAffected > 0) {
-                        System.out.println("User updated successfully.");
-                    } else {
-                        System.out.println("User not found or update failed.");
-                    }
+                if (rowsAffected > 0) {
+                    System.out.println("User updated successfully.");
+                } else {
+                    System.out.println("User not found or update failed.");
                 }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -331,7 +336,7 @@ public class Database {
         private void updateUsersForCompany(Connection connection,
                                            long companyId, Set<User> users) throws SQLException {//todo
             // SQL-запрос для удаления текущих связей компании с пользователями
-            String deleteUsersForCompanyQuery = "DELETE FROM companies " +
+            String deleteUsersForCompanyQuery = "DELETE users FROM companies " +
                     "WHERE id = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(deleteUsersForCompanyQuery)) {

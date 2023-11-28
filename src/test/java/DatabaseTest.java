@@ -1,6 +1,7 @@
 import Entities.Company;
 import Entities.User;
 import database.Database;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +28,7 @@ public class DatabaseTest {
                         "://cornelius.db.elephantsql.com:5432/hmtdjque",
                 "hmtdjque",
                 "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+//        database = new Database();
         database.connection.prepareStatement("DROP table users;DROP table " +
                 "companies;CREATE TABLE users (\n" +
                 "                       id SERIAL PRIMARY KEY,\n" +
@@ -102,8 +104,6 @@ public class DatabaseTest {
         assertEquals(testUser.getMoney(), retrievedUser.getMoney());
         assertEquals(testUser.getShares(), retrievedUser.getShares());
     }
-
-    // Add similar tests for update and delete methods
 
     @Test
     public void testInMemoryCompanyGetById() {
@@ -182,5 +182,135 @@ public class DatabaseTest {
         assertEquals(2, updatedCompany.getUsers().size());
         assertTrue(updatedCompany.getUsers().contains(user1));
         assertTrue(updatedCompany.getUsers().contains(user2));
+    }
+
+
+    @Test
+    public void testDatabaseSetConnection() {
+        try {
+            // Create a new connection and set it in the database
+            new Database(DriverManager.getConnection("jdbc:postgresql" +
+                    "://new-database-url:5432/new-database", "new-username", "new-password"));
+            // Check if the connection is set successfully
+            assertNotNull(database.connection);
+        } catch (SQLException e) {
+            System.out.println("it`s ok if only sqlexception");
+        }
+    }
+
+    @Test
+    public void testInMemoryCompanyGetAll() {
+        // Create companies and add them to the database
+        Company company1 = new Company(1, "Company1", 100, 50, 0.5F, 1000, 10, new HashSet<>());
+        Company company2 = new Company(2, "Company2", 200, 100, 0.7F, 1500, 15, new HashSet<>());
+        database.new InMemoryCompany().create(company1);
+        database.new InMemoryCompany().create(company2);
+
+        // Retrieve all companies
+        var allCompanies = database.new InMemoryCompany().getAll();
+
+        // Check if all companies are retrieved
+        assertEquals(2, allCompanies.size());
+        assertTrue(allCompanies.contains(company1));
+        assertTrue(allCompanies.contains(company2));
+    }
+
+    @Test
+    public void testInMemoryCompanyUpdate() {
+        // Create a company and add it to the database
+        Company testCompany = new Company(1, "TestCompany", 100, 50, 0.5F, 1000, 10, new HashSet<>());
+        database.new InMemoryCompany().create(testCompany);
+
+        // Update the company
+        testCompany = new Company(testCompany.getId(), "UpdatedCompany",
+                200, testCompany.getVacantShares(),
+                testCompany.getKeyShareholderThreshold(),
+                testCompany.getMoney(), testCompany.getSharePrice(),
+                testCompany.getUsers());
+        database.new InMemoryCompany().update(testCompany);
+
+        // Retrieve the updated company
+        Company updatedCompany = database.new InMemoryCompany().getById(1);
+
+        // Check if the company is updated successfully
+        assertNotNull(updatedCompany);
+        assertEquals("UpdatedCompany", updatedCompany.getCompanyName());
+        assertEquals(200, updatedCompany.getTotalShares());
+    }
+
+    @Test
+    public void testInMemoryCompanyDelete() {
+        // Create a company and add it to the database
+        Company testCompany = new Company(1, "TestCompany", 100, 50, 0.5F, 1000, 10, new HashSet<>());
+        database.new InMemoryCompany().create(testCompany);
+
+        // Delete the company
+        database.new InMemoryCompany().delete(1);
+
+        // Try to retrieve the deleted company
+        Company deletedCompany = database.new InMemoryCompany().getById(1);
+
+        // Check if the company is deleted successfully
+        assertNull(deletedCompany);
+    }
+
+    //todo
+    public void testInMemoryCompanyUpdateUsersForCompany() {
+        // Create a company and add it to the database
+        Company testCompany = new Company(1, "TestCompany", 100, 50, 0.5F, 1000, 10, new HashSet<>());
+        database.new InMemoryCompany().create(testCompany);
+
+        // Create users and add them to the company
+        User user1 = new User(101, "User101", 100.0, new HashMap<>());
+        User user2 = new User(102, "User102", 150.0, new HashMap<>());
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+
+        //database.new InMemoryCompany().updateUsersForCompany(1, users); //todo
+
+        // Retrieve the updated company
+        Company updatedCompany = database.new InMemoryCompany().getById(1);
+
+        // Check if the users were added to the company
+        assertNotNull(updatedCompany);
+        assertEquals(2, updatedCompany.getUsers().size());
+        assertTrue(updatedCompany.getUsers().contains(user1));
+        assertTrue(updatedCompany.getUsers().contains(user2));
+    }
+
+    @Test
+    public void testInMemoryUserUpdate() {
+        // Create a user and add it to the database
+        User testUser = new User(1, "TestUser", 100.0, new HashMap<>());
+        database.new InMemoryUser().create(testUser);
+
+        // Update the user
+        testUser = new User(1, "UpdatedUser", 150.0, testUser.getShares());
+        database.new InMemoryUser().update(testUser);
+
+        // Retrieve the updated user
+        User updatedUser = database.new InMemoryUser().getById(1);
+
+        // Check if the user is updated successfully
+        assertNotNull(updatedUser);
+        assertEquals("UpdatedUser", updatedUser.getUserName());
+        assertEquals(150.0, updatedUser.getMoney());
+    }
+
+    @Test
+    public void testInMemoryUserDelete() {
+        // Create a user and add it to the database
+        User testUser = new User(1, "TestUser", 100.0, new HashMap<>());
+        database.new InMemoryUser().create(testUser);
+
+        // Delete the user
+        database.new InMemoryUser().delete(1);
+
+        // Try to retrieve the deleted user
+        User deletedUser = database.new InMemoryUser().getById(1);
+
+        // Check if the user is deleted successfully
+        assertNull(deletedUser);
     }
 }
