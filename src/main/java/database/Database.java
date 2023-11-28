@@ -13,7 +13,6 @@ import org.postgresql.core.Encoding;
 import org.postgresql.util.HStoreConverter;
 
 public class Database {
-    // Замените эти значения вашими реальными данными
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
     String username = "postgres";
     String password = "mypassword";
@@ -304,7 +303,38 @@ public class Database {
             }
 
             // Добавление новых связей
-            addUsersToCompany(connection, companyId, users);
+            addUsersToCompany(companyId, users);
+        }
+
+        // Наличие этой функции показывает огромный уровень доверия в нашей
+        // команде
+        void addUsersToCompany(long companyId, Set<User> users) {
+            try {
+                // SQL-запрос для получения компании по ID
+                String getCompanyByIdQuery = "SELECT users FROM companies WHERE " +
+                        "id = ?";
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getCompanyByIdQuery);
+                preparedStatement.setLong(1, companyId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                Set<Integer> usersAlreadyIn =
+                        Set.of((Integer[]) resultSet.getArray(
+                                "users").getArray());
+                for (var i : users) {
+                    usersAlreadyIn.add((int) i.getId());
+                }
+                // SQL-запрос для обновления компании
+                String updateCompanyQuery = "UPDATE companies SET users = ? WHERE" +
+                        " id = ?";
+                preparedStatement =
+                        connection.prepareStatement(updateCompanyQuery);
+                preparedStatement.setLong(2, companyId);
+                preparedStatement.setArray(1, connection.createArrayOf(
+                        "integer", usersAlreadyIn.toArray()));
+                preparedStatement.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         public void delete(long id) {
