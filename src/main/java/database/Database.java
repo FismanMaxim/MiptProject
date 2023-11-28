@@ -14,6 +14,7 @@ public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
     String username = "postgres";
     String password = "mypassword";
+
     public Connection connection;
 
     public Database() {
@@ -361,8 +362,7 @@ public class Database {
                         usersAlreadyIn =
                                 Set.of((Integer[]) resultSet.getArray(
                                         "users").getArray());
-                    }
-                    catch (NullPointerException e){
+                    } catch (NullPointerException e) {
                         usersAlreadyIn = new HashSet<>();
                     }
                     for (var i : users) {

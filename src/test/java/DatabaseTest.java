@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,9 +20,29 @@ public class DatabaseTest {
     private static Database database;
 
     @BeforeAll
-    public static void setUp() {
+    public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
-        database = new Database();
+
+        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+                "hmtdjque",
+                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        database.connection.prepareStatement("DROP table users;DROP table " +
+                "companies;CREATE TABLE users (\n" +
+                "                       id SERIAL PRIMARY KEY,\n" +
+                "                       name VARCHAR(255),\n" +
+                "                       money INT,\n" +
+                "                       shares hstore\n" +
+                ");CREATE TABLE companies (\n" +
+                "                           id SERIAL PRIMARY KEY,\n" +
+                "                           users INT[],\n" +
+                "                           name VARCHAR(255) NOT NULL,\n" +
+                "                           key_shareholder_threshold INT NOT NULL,\n" +
+                "                           vacant_shares INT NOT NULL,\n" +
+                "                           total_shares INT NOT NULL,\n" +
+                "                           money INT NOT NULL,\n" +
+                "                           share_price INT NOT NULL\n" +
+                ");").execute();
     }
 
     @AfterAll
@@ -30,20 +51,20 @@ public class DatabaseTest {
         // You might want to move this to an @AfterEach method if you're using JUnit 4
         database.dropConnection();
     }
+
     @AfterEach
-public void clearing(){
-    try {
+    public void clearing() {
+        try {
+            database.connection.prepareStatement("delete from users where id != " +
+                    "-3").execute();
+            database.connection.prepareStatement("delete from companies where id != " +
+                    "-3").execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        database.connection.prepareStatement("delete from users where id != " +
-                "-3").execute();
-        database.connection.prepareStatement("delete from companies where id != " +
-                "-3").execute();
-    }
-    catch (SQLException e){
-        e.printStackTrace();
     }
 
-}
     @Test
     public void testInMemoryUserGetById() {
         // Create a user and add it to the database
@@ -106,7 +127,9 @@ public void clearing(){
         assertEquals(testCompany.getMoney(), retrievedCompany.getMoney());
         assertEquals(testCompany.getSharePrice(), retrievedCompany.getSharePrice());
         assertEquals(testCompany.getUsers(), retrievedCompany.getUsers());
-    }    @Test
+    }
+
+    @Test
     public void testInMemoryCompanyCreate() {
         // Create a company and add it to the database
         Company testCompany = new Company(2, "TestCompany2", 200, 100, 0.7F,
@@ -132,6 +155,7 @@ public void clearing(){
         assertNotNull(retrievedCompany.getUsers());
         assertTrue(retrievedCompany.getUsers().isEmpty());
     }
+
     @Test
     public void testInMemoryCompanyAddUsersToCompany() {
         // Create a company and add it to the database
