@@ -1,18 +1,13 @@
 package EntitiesControllers;
 
-import DTOs.UserDTO;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;
 import InMemoryRepos.InMemoryUserRepository;
-import Responses.EntityIdResponse;
-import Responses.FindCompanyResponse;
-import Responses.FindUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import spark.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,7 +15,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -113,7 +107,8 @@ class CompanyControllerTest {
 
         Supplier<HttpResponse<String>> createCompany = () -> {
             try {
-                HttpResponse<String> response = HttpClient.newHttpClient()
+
+                return HttpClient.newHttpClient()
                         .send(
                                 HttpRequest.newBuilder()
                                         .POST(
@@ -125,8 +120,6 @@ class CompanyControllerTest {
                                         .build(),
                                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                         );
-
-                return response;
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }

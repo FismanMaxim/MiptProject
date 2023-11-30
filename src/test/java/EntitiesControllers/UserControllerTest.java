@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -21,7 +20,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -102,7 +100,8 @@ class UserControllerTest {
 
         Supplier<HttpResponse<String>> createUser = () -> {
             try {
-                HttpResponse<String> response = HttpClient.newHttpClient()
+
+                return HttpClient.newHttpClient()
                         .send(
                                 HttpRequest.newBuilder()
                                         .POST(
@@ -114,8 +113,6 @@ class UserControllerTest {
                                         .build(),
                                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                         );
-
-                return response;
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
