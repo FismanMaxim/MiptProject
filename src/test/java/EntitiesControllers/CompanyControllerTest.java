@@ -9,9 +9,6 @@ import Responses.EntityIdResponse;
 import Responses.FindCompanyResponse;
 import Responses.FindUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Service;
 
@@ -26,27 +23,12 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompanyControllerTest {
-    private Service service;
-    private static ObjectMapper mapper;
-
-    @BeforeAll
-    static void initMapper() {
-        mapper = new ObjectMapper();
-    }
-
-    @BeforeEach
-    void initService() {
-        service = Service.ignite();
-    }
-
-    @AfterEach
-    void stopService() {
-        service.stop();
-        service.awaitStop();
-    }
 
     @Test
     void companyControllerCRUD() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        Service service = Service.ignite();
+
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
         UserService userService = new UserService(new InMemoryUserRepository());
         ControllersManager manager = new ControllersManager(List.of(
@@ -214,6 +196,10 @@ class CompanyControllerTest {
                 );
 
         assertEquals(200, response.statusCode());
+
+        // Destroy
+        service.stop();
+        service.awaitStop();
     }
 }
 
