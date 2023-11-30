@@ -146,7 +146,7 @@ public class CompanyController extends EntityController {
                     company = company.withCountShares(company.getTotalShares() + deltaSharesNode.intValue());
                 }
                 if (thresholdNode != null) {
-                    company = company.withThreshold(thresholdNode.floatValue());
+                    company = company.withThreshold(thresholdNode.intValue());
                 }
                 if (moneyNode != null)
                     company = company.withMoney(moneyNode.longValue());

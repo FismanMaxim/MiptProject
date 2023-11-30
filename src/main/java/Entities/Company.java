@@ -9,24 +9,24 @@ public class Company implements StoredById {
     private final String companyName;
     private final int totalShares;
     private final int vacantShares;
-    private final float keyShareholderThreshold;
+    private final int keyShareholderThreshold;
     private final long money;
 
     private final long sharePrice;
     private final Set<User> users;
 
-    public Company(long id, String companyName, int totalShares, float keyShareholderThreshold,
+    public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
                    long money, long sharePrice) {
         this(id, companyName, totalShares, totalShares, keyShareholderThreshold, money, sharePrice);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   float keyShareholderThreshold, long money, long sharePrice) {
+                   int keyShareholderThreshold, long money, long sharePrice) {
         this(id, companyName, totalShares, vacantShares, keyShareholderThreshold, money, sharePrice, new HashSet<>());
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   float keyShareholderThreshold, long money, long sharePrice, Set<User> users) {
+                   int keyShareholderThreshold, long money, long sharePrice, Set<User> users) {
         this.id = id;
         this.companyName = companyName;
         this.totalShares = totalShares;
@@ -87,9 +87,9 @@ public class Company implements StoredById {
         return new Company(id, companyName, countShares, countShares, keyShareholderThreshold,
                 money, sharePrice, users);
     }
-    public Company withThreshold(float threshold) {
-        if (threshold <= 0 || threshold > 1)
-            throw new IllegalArgumentException("Key shareholder threshold must lie within (0, 1]");
+    public Company withThreshold(int threshold) {
+        if (threshold <= 0 || threshold > totalShares)
+            throw new IllegalArgumentException("Key shareholder threshold must lie within (0, totalShares]");
 
         return new Company(id, companyName, totalShares, vacantShares, threshold, money,
                 sharePrice, users);
@@ -125,7 +125,7 @@ public class Company implements StoredById {
     public List<User> getKeyShareholders() {
         List<User> keyShareholders = new ArrayList<>();
         for (var holder : users) {
-            if ((float) holder.getShares().get(id) / totalShares >= keyShareholderThreshold) {
+            if (holder.getShares().get(id) >= keyShareholderThreshold) {
                 keyShareholders.add(holder);
             }
         }

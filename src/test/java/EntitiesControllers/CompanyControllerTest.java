@@ -63,7 +63,7 @@ class CompanyControllerTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"testName\", \"threshold\": 0.25, \"shares\": 100, " +
+                                                "{\"name\": \"testName\", \"threshold\": 25, \"shares\": 100, " +
                                                         "\"money\": 1000000, \"sharePrice\": 100}"
                                         )
                                 )
@@ -169,7 +169,7 @@ class CompanyControllerTest {
         assertEquals("newCompanyName", findCompanyResponse.companyName());
         assertEquals(100, findCompanyResponse.totalShares());
         assertEquals(50, findCompanyResponse.vacantShares());
-        assertEquals(0.25, findCompanyResponse.keyShareholderThreshold());
+        assertEquals(25, findCompanyResponse.keyShareholderThreshold());
         assertEquals(2000000, findCompanyResponse.money());
         assertEquals(100, findCompanyResponse.sharePrice());
         assertEquals(1, findCompanyResponse.users().size());

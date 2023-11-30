@@ -13,7 +13,7 @@ class CompanyTest {
     void calculateKeyShareholders() throws NegativeSharesException {
         // Assign
         Company company = new Company(0, "testName",
-                100, 0.50f, 0, 100);
+                100, 50, 0, 100);
         User user1 = new User(1, "user1", 1000);
         User user2 = new User(2, "user2", 1000);
 

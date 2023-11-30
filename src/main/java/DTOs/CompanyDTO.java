@@ -4,13 +4,13 @@ import Entities.Company;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record CompanyDTO(String name, int totalShares, int vacantShares, float keySharesThreshold, long money, long sharePrice) implements EntityDTO<Company> {
+public record CompanyDTO(String name, int totalShares, int vacantShares, int keySharesThreshold, long money, long sharePrice) implements EntityDTO<Company> {
     @JsonCreator
     public CompanyDTO(
             @JsonProperty("name") String name,
             @JsonProperty("shares") int totalShares,
             @JsonProperty("vacantShares") int vacantShares,
-            @JsonProperty("threshold") float keySharesThreshold,
+            @JsonProperty("threshold") int keySharesThreshold,
             @JsonProperty("money") long money,
             @JsonProperty("sharePrice") long sharePrice
     ) {
