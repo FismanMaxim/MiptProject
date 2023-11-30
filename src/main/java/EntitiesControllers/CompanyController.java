@@ -143,7 +143,7 @@ public class CompanyController extends EntityController {
                     company = company.withName(nameNode.textValue());
                 }
                 if (deltaSharesNode != null) {
-                    company = company.withCountShares(company.getTotalShares() + deltaSharesNode.intValue());
+                    company = company.withCountShares(company.getTotalShares() + deltaSharesNode.intValue(), false);
                 }
                 if (thresholdNode != null) {
                     company = company.withThreshold(thresholdNode.intValue());

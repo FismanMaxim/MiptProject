@@ -28,4 +28,25 @@ class CompanyTest {
         // Assert
         assertEquals(List.of(user2), keyShareholders);
     }
+
+    @Test
+    void withMethods() {
+        // Assign
+        Company company = new Company(0, "testName",
+                100, 50, 0, 100);
+
+        // Act
+        company = company
+                .withName("newName")
+                .withMoney(1)
+                .withThreshold(10)
+                .withVacantSharesDelta(10)
+                .withCountShares(1000, false);
+
+        assert company.getCompanyName().equals("newName");
+        assert company.getMoney() == 1;
+        assert company.getKeyShareholderThreshold() == 10;
+        assert company.getVacantShares() == 1000;
+        assert company.getTotalShares() == 1000;
+    }
 }

@@ -80,11 +80,11 @@ public class Company implements StoredById {
         return new Company(id, name, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, users);
     }
-    public Company withCountShares(int countShares) {
+    public Company withCountShares(int countShares, boolean preserveVacantShares) {
         if (countShares < this.totalShares)
             throw new IllegalArgumentException("Total number of shares cannot decrease");
 
-        return new Company(id, companyName, countShares, countShares, keyShareholderThreshold,
+        return new Company(id, companyName, countShares, preserveVacantShares ? vacantShares : countShares, keyShareholderThreshold,
                 money, sharePrice, users);
     }
     public Company withThreshold(int threshold) {
