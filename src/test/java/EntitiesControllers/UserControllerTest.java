@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserControllerTest {
-    private UserService userService;
     private Service service;
     private static ObjectMapper mapper;
 
@@ -37,7 +36,15 @@ class UserControllerTest {
     @BeforeEach
     void initService() {
         service = Service.ignite();
-        userService = new UserService(new InMemoryUserRepository());
+        UserService userService = new UserService(new InMemoryUserRepository());
+
+        CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
+        ControllersManager manager = new ControllersManager(List.of(
+                new UserController(service, userService, companyService, mapper)
+        ));
+
+        manager.start();
+        service.awaitInitialization();
     }
 
     @AfterEach
@@ -48,14 +55,6 @@ class UserControllerTest {
 
      @Test
      void getUserByIdTest() throws IOException, InterruptedException {
-         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
-         ControllersManager manager = new ControllersManager(List.of(
-                 new UserController(service, userService, companyService, mapper)
-         ));
-
-         manager.start();
-         service.awaitInitialization();
-
          // Create user
          HttpClient.newHttpClient()
                  .send(
@@ -90,14 +89,6 @@ class UserControllerTest {
 
     @Test
     void errorOnCreateUser() {
-        CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
-        ControllersManager manager = new ControllersManager(List.of(
-                new UserController(service, userService, companyService, mapper)
-        ));
-
-        manager.start();
-        service.awaitInitialization();
-
         Supplier<HttpResponse<String>> createUser = () -> {
             try {
 
@@ -124,14 +115,6 @@ class UserControllerTest {
 
     @Test
     void ErrorOnUpdateUser() throws IOException, InterruptedException {
-        CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
-        ControllersManager manager = new ControllersManager(List.of(
-                new UserController(service, userService, companyService, mapper)
-        ));
-
-        manager.start();
-        service.awaitInitialization();
-
         // Update non-existing user
         HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(

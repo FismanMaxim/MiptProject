@@ -20,7 +20,6 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompanyControllerTest {
-    private CompanyService companyService;
     private Service service;
     private static ObjectMapper mapper;
 
@@ -32,18 +31,8 @@ class CompanyControllerTest {
     @BeforeEach
     void initService() {
         service = Service.ignite();
-        companyService = new CompanyService(new InMemoryCompanyRepository());
-    }
+        CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
 
-    @AfterEach
-    void stopService() {
-        service.stop();
-        service.awaitStop();
-    }
-
-
-    @Test
-    void errorOnGetCompanyById() throws IOException, InterruptedException {
         UserService userService = new UserService(new InMemoryUserRepository());
         ControllersManager manager = new ControllersManager(List.of(
                 new CompanyController(service, companyService, mapper),
@@ -52,7 +41,16 @@ class CompanyControllerTest {
 
         manager.start();
         service.awaitInitialization();
+    }
 
+    @AfterEach
+    void stopService() {
+        service.stop();
+        service.awaitStop();
+    }
+
+    @Test
+    void errorOnGetCompanyById() throws IOException, InterruptedException {
         // Read non-existing company
         HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(
@@ -68,15 +66,6 @@ class CompanyControllerTest {
 
     @Test
     void errorOnUpdateCompanyById() throws IOException, InterruptedException {
-        UserService userService = new UserService(new InMemoryUserRepository());
-        ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
-        ));
-
-        manager.start();
-        service.awaitInitialization();
-
         // Update non-existing company
         HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(
@@ -96,15 +85,6 @@ class CompanyControllerTest {
     }
 
     @Test void errorOnCreateCompany() {
-        UserService userService = new UserService(new InMemoryUserRepository());
-        ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
-        ));
-
-        manager.start();
-        service.awaitInitialization();
-
         Supplier<HttpResponse<String>> createCompany = () -> {
             try {
 

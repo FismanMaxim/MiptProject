@@ -28,8 +28,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class End2EndCRUD {
-    private CompanyService companyService;
+public class EntitiesCRUDTest {
     private Service service;
     private static ObjectMapper mapper;
 
@@ -41,7 +40,16 @@ public class End2EndCRUD {
     @BeforeEach
     void initService() {
         service = Service.ignite();
-        companyService = new CompanyService(new InMemoryCompanyRepository());
+        CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
+
+        UserService userService = new UserService(new InMemoryUserRepository());
+        ControllersManager manager = new ControllersManager(List.of(
+                new CompanyController(service, companyService, mapper),
+                new UserController(service, userService, companyService, mapper)
+        ));
+
+        manager.start();
+        service.awaitInitialization();
     }
 
     @AfterEach
@@ -52,15 +60,6 @@ public class End2EndCRUD {
 
     @Test
     void companyControllerCRUD() throws Exception {
-        UserService userService = new UserService(new InMemoryUserRepository());
-        ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
-        ));
-
-        manager.start();
-        service.awaitInitialization();
-
         // Create company
         HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(
