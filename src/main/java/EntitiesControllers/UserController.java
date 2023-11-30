@@ -52,7 +52,7 @@ public class UserController extends EntityController {
                         "Failed to convert json string to an instance of User: " + request.body(),
                         response,
                         e,
-                        404);
+                        400);
             }
 
             try {

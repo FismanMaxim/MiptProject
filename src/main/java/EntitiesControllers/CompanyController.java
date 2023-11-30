@@ -43,10 +43,10 @@ public class CompanyController extends EntityController {
                 companyDTO = objectMapper.readValue(request.body(), CompanyDTO.class);
             } catch (JsonProcessingException e) {
                 return InformOfClientError(LOGGER,
-                        "Failed to convert json string to an instance of User: " + request.body(),
+                        "Failed to convert json string to an instance of Company: " + request.body(),
                         response,
                         e,
-                        404);
+                        400);
             }
 
             try {
@@ -75,7 +75,7 @@ public class CompanyController extends EntityController {
                         "Failed to convert parameter companyId to type Long: " + request.params("companyId"),
                         response,
                         e,
-                        404);
+                        400);
             }
 
             try {
