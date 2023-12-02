@@ -1,0 +1,148 @@
+<html onselectstart="return false">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+		
+		<title>
+			MTSProject
+		</title>
+
+		
+		<script src="Objects/interface.js" defer></script>
+		<script src="Objects/classes.js" defer></script>
+		<script src="Objects/requests.js" defer></script>
+		<link rel="stylesheet" href="Objects/index.css">
+	</head>
+	<body onselectstart="return false" onload="prepairPage()">
+		<div class="registerBlock">
+			<div class="registerBG"></div>
+			<form class="registerForm">
+				<div class="registerDataContainer rdc">
+					<div class="registerNameBlock"><div class="registerName flexable"><span>Registration</span></div></div>
+					<div class="registerFormContainer rfc flexable">
+						<div class="registerInput"><input class="input rInputEmail" type="email" placeholder="your@mail.com" required></div>
+						<div class="registerInput"><input class="input rInputName" type="text" placeholder="Username" required></div>
+						<div class="registerInput"><input class="input rInputPass" type="password" placeholder="Password" required></div>
+						<div class="registerInput"><input class="input rInputNick" type="text" placeholder="Nickname" required></div>
+						<div class="registerToggle">
+							<div class="rToggleText flexable"><span>Corporative account</span></div>
+							<input class="toggle rToggle" type="checkbox">
+						</div>
+					</div>
+					<div class="submitButtonContainer flexable">
+						<div class="submitButton flexable">
+							<div class="submit flexable" onclick="registration()"><span>Sumbit</span></div>
+						</div>
+					</div>
+				</div>
+			</form>
+			<form class="loginForm">
+				<div class="registerDataContainer ldc">
+					<div class="registerName flexable"><span>Login</span></div>
+					<div class="registerFormContainer lfc flexable">
+						<div class="registerInput"><input class="input lInputName" type="text" placeholder="Username" required></div>
+						<div class="registerInput"><input class="input lInputPass" type="password" placeholder="Password" required></div>
+						<div class="registerToggle">
+							<div class="rToggleText flexable"><span>Corporative account</span></div>
+							<input class="toggle lToggle" type="checkbox">
+						</div>
+					</div>
+					<div class="submitButtonContainer flexable">
+						<div class="submitButton flexable">
+							<div class="submit flexable" onclick="authorization()"><span>Sumbit</span></div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="transactionBlock">
+			<form class="sharesUpdateForm">
+				<div class="sharesUpdateContainer flexable">
+					<div class="transactionCompanyName flexable"><span class="companyName">Company Name</span></div>
+					<div class="transactionCompanyCost flexable"><span class="companyCost">Shares Cost</span></div>
+					
+					<div class="transactionUserBalance flexable"><span class="transactionUserValue">You havn't got shares of this company</span></div>
+					<div class="transactionButtonsBlock flexable clickable">
+						<div class="sharesTransactionBuyButton tButton flexable" onclick="confirmBuy()"><span>Buy shares</span></div>
+						<div class="sharesTransactionBuyButton tButton flexable" onclick="confirmSel()"><span>Sell shares</span></div>
+					</div>
+				</div>
+			</form>
+			<div class="transactionBG" onclick="removeTransitionForm()"></div>
+		</div>
+		<div class="transactionConfirmBlock">
+			<form class="sharesConfirmForm">
+				<div class="sharesConfirmContainer flexable">
+					<div class="registerInput"><input class="input lInputSharesDelta" type="text" placeholder="Enter the number of" required></div>
+					<div class="sharesTransactionConfirmBuyButton flexable" onclick="buyShares()"><span>shares to buy</span></div>
+					<div class="sharesTransactionConfirmSelButton flexable" onclick="selShares()"><span>shares to sell</span></div>
+				</div>
+			</form>
+			<div class="transactionCBG" onclick="removeTransitionConfirmForm()"></div>
+		</div>
+		<header class="header flexable">
+			<div class="logoContainer flexable">
+				<div class="logoIconContainer flexable">
+					<div class="logo flexable"></div>
+				</div>
+				
+				<div class="logoNameContainer flexable">
+					<div class="logoName flexable">
+						<span>Акции</span>
+					</div>
+				</div>
+			</div>	
+			<div class="registerContainer flexable">
+				<div class="rButtonContainer flexable">
+					<div class="signInButton clickable flexable button" onclick="loginForm()">
+						<span>Sign In</span>
+					</div>
+					<div class="signUpButton clickable flexable button" onclick="registerForm()">
+						<span>Sign Up</span>
+					</div>
+				</div>
+				<div class="rDecorBlock"></div>
+			</div>
+		</header>
+		<main class="main flexable">
+			<div class="mainContainer flexable">
+				<div class="mainInfoContainer flexable">
+					<div class="mainInfo flexable">
+						<span>Деловые новости</span>
+					</div>
+				</div>
+				<div class="mainReviewTabs flexable">
+					<div class="reviewButton clickable sharesButton flexable" id="activeReviewButton" onclick="chooseReviewTab('shares')"><span>Stocks</span></div>
+					<div class="reviewButton clickable newsButton flexable" onclick="chooseReviewTab('news')"><span>News</span></div>
+					<div class="reviewButton clickable logsButton flexable" onclick="chooseReviewTab('logs')"><span>Logs</span></div>
+				</div>
+				<div class="mainReviewTableContainer flexable">
+					<div class="mainReviewTable">
+						<table class="sharesBlock" id="activeReviewBlock">
+							<tr>
+								<th>Shareholder</th>
+								<th>Share price</th>
+								<th>Threshold value</th>
+							</tr>
+						</table>
+						<div class="newsBlock">
+						
+						</div>
+						<div class="logsBlock">
+						
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		<footer class="footer flexable">
+			<div class="contactsContainer flexable">
+				<div class="contactsText flexable"><div class="contactsTextBlock"><span>Contacts</span></div></div>
+				<div class="contacts flexable">
+					<div class="contactsBlock"><a href="https://vk.com/belldh"><div class="vkIcon"></div></a></div>
+					<div class="contactsBlock"><a href="https://t.me/belldh"><div class="tgIcon"></div></a></div>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>
