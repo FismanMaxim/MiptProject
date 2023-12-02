@@ -16,7 +16,7 @@ public abstract class EntityService<T extends StoredById> {
     public T getById(long id) {
         try {
             return repository.getById(id);
-        } catch (EntityIdNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             throw new GetEntityException("Cannot get entity by id=" + id, e);
         }
     }
@@ -36,7 +36,7 @@ public abstract class EntityService<T extends StoredById> {
     public void update(T obj) {
         try {
             repository.update(obj);
-        } catch (EntityIdNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             throw new UpdateEntityException("Cannot update entity with given id since it was not found, id=" + obj.getId(), e);
         }
     }
@@ -44,7 +44,7 @@ public abstract class EntityService<T extends StoredById> {
     public void delete(long id) {
         try {
             repository.delete(id);
-        } catch (EntityIdNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             throw new DeleteEntityException("Cannot delete entity with given id since it was not found, id=" + id, e);
         }
     }

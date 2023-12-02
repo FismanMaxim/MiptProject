@@ -7,6 +7,7 @@ import Entities.User;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import Requests.AddUserSharesRequest;
+import Requests.AuthenticationRequest;
 import Responses.EntityIdResponse;
 import Responses.FindUserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,7 @@ public class UserController extends EntityController {
     public void initializeEndpoints() {
         createUserEndpoint();
         getUserByIdEndpoint();
+        getUserByNamePasswordEndpoint();
         updateUserMoneyNameEndpoint();
         updateUserSharesEndpoint();
         deleteUserEndpoint();
@@ -44,16 +46,40 @@ public class UserController extends EntityController {
         service.post("/api/usr", (Request request, Response response) -> {
             response.type("application.json");
 
-            UserDTO userDTO;
+            JsonNode jsonTree;
             try {
-                userDTO = objectMapper.readValue(request.body(), UserDTO.class);
+                jsonTree = objectMapper.readTree(request.body());
             } catch (JsonProcessingException e) {
                 return InformOfClientError(LOGGER,
-                        "Failed to convert json string to an instance of User: " + request.body(),
+                        "Failed to convert body to json tree: " + request.body(),
                         response,
                         e,
                         400);
             }
+
+            JsonNode userName = jsonTree.get("name");
+            JsonNode password = jsonTree.get("password");
+
+            if (userName == null || password == null) {
+                return InformOfClientError(LOGGER,
+                        "Not found obligatory parameters name and password",
+                        response,
+                        new IllegalArgumentException(),
+                        400);
+            }
+
+            UserDTO userDTO = new UserDTO(userName.textValue(), password.textValue());
+
+//            UserDTO userDTO;
+//            try {
+//                userDTO = objectMapper.readValue(request.body(), UserDTO.class);
+//            } catch (JsonProcessingException e) {
+//                return InformOfClientError(LOGGER,
+//                        "Failed to convert json string to an instance of User: " + request.body(),
+//                        response,
+//                        e,
+//                        400);
+//            }
 
             try {
                 long createdId = userService.create(userDTO);
@@ -91,6 +117,35 @@ public class UserController extends EntityController {
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find user by id, id=" + id,
+                        response,
+                        e,
+                        404);
+            }
+        });
+    }
+
+    void getUserByNamePasswordEndpoint() {
+        service.post("/api/usr/auth", (Request request, Response response) -> {
+            response.type("application.json");
+
+            AuthenticationRequest authenticateRequest;
+            try {
+                authenticateRequest = objectMapper.readValue(request.body(), AuthenticationRequest.class);
+            } catch (JsonProcessingException e) {
+                return InformOfClientError(LOGGER,
+                        "Failed to read body: " + request.body(),
+                        response,
+                        e,
+                        400);
+            }
+
+            try {
+                User user = userService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                response.status(200);
+                return objectMapper.writeValueAsString(new FindUserResponse(new UserDTO(user)));
+            } catch (GetEntityException e) {
+                return InformOfClientError(LOGGER,
+                        "Failed to find user with given username and password",
                         response,
                         e,
                         404);
@@ -143,7 +198,7 @@ public class UserController extends EntityController {
                             response,
                             e,
                             400);
-                } catch (EntityIdNotFoundException e) {
+                } catch (EntityNotFoundException e) {
                     return InformOfClientError(LOGGER,
                             "User with given id not found, id=" + id,
                             response,
@@ -155,7 +210,7 @@ public class UserController extends EntityController {
             if (newNameNode != null) {
                 try {
                     userService.updateName(id, newNameNode.textValue());
-                } catch (EntityIdNotFoundException e) {
+                } catch (EntityNotFoundException e) {
                     return InformOfClientError(LOGGER,
                             "User with given id not found, id=" + id,
                             response,
@@ -218,7 +273,7 @@ public class UserController extends EntityController {
             try {
                 userService.updateMoney(id, -totalPrice);
                 userService.updateShares(id, addUserSharesRequest.sharesDelta());
-            } catch (EntityIdNotFoundException e) {
+            } catch (EntityNotFoundException e) {
                 return InformOfClientError(LOGGER,
                         "User with given id not found, id=" + id,
                         response,

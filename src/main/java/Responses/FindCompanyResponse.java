@@ -1,10 +1,13 @@
 package Responses;
 
-import DTOs.UserDTO;
+import DTOs.CompanyDTO;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-
-public record FindCompanyResponse (
-        String companyName, int totalShares, int vacantShares, float keyShareholderThreshold,
-        long money, long sharePrice, List<UserDTO> users) {
+public record FindCompanyResponse (CompanyDTO companyDTO) {
+    @JsonCreator
+    public FindCompanyResponse(
+            @JsonProperty("companyDTO") CompanyDTO companyDTO) {
+        this.companyDTO = companyDTO;
+    }
 }

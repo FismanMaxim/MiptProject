@@ -1,7 +1,7 @@
 package InMemoryRepos;
 
 import CustomExceptions.EntityDuplicatedException;
-import CustomExceptions.EntityIdNotFoundException;
+import CustomExceptions.EntityNotFoundException;
 import Entities.User;
 import EntitiesRepositories.EntityRepository;
 
@@ -30,8 +30,16 @@ public class InMemoryUserRepository implements EntityRepository<User> {
     public User getById(long id) {
         User user = users.get(id);
         if (user == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
         return user;
+    }
+
+    @Override
+    public User getByNamePassword(String name, String password) {
+        for (var key : users.keySet())
+            if (users.get(key).getUserName().equals(name) && users.get(key).getPassword().equals(password))
+                return users.get(key);
+        throw new EntityNotFoundException();
     }
 
     @Override
@@ -44,13 +52,13 @@ public class InMemoryUserRepository implements EntityRepository<User> {
     @Override
     public void update(User user) {
         if (users.get(user.getId()) == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
         users.put(user.getId(),  user);
     }
 
     @Override
     public void delete(long id) {
         if (users.remove(id) == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
     }
 }

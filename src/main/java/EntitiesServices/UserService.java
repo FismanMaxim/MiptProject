@@ -7,7 +7,7 @@ import Requests.ShareDelta;
 
 import java.util.List;
 
-public class UserService extends EntityService<User> {
+public class UserService extends EntityService<User> implements StoredByNamePasswordService<User> {
 
     public UserService(EntityRepository<User> repository) {
         super(repository);
@@ -34,5 +34,10 @@ public class UserService extends EntityService<User> {
         User user = repository.getById(id);
         user = user.withSharesDelta(sharesDelta);
         repository.update(user);
+    }
+
+    @Override
+    public User getByNamePassword(String name, String password) {
+        return repository.getByNamePassword(name, password);
     }
 }

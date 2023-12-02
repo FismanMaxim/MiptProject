@@ -1,7 +1,7 @@
 package EntitiesRepositories;
 
 import CustomExceptions.EntityDuplicatedException;
-import CustomExceptions.EntityIdNotFoundException;
+import CustomExceptions.EntityNotFoundException;
 import Entities.StoredById;
 
 import java.util.List;
@@ -21,9 +21,15 @@ public interface EntityRepository<T extends StoredById> {
     /**
      * Finds object with the given id in the repository
      * @return Returns the object with the given id
-     * @throws EntityIdNotFoundException if the repository contains no object with the given id
+     * @throws EntityNotFoundException if the repository contains no object with the given id
      */
     T getById(long id);
+
+    /**
+     * Finds object whose name and password match the given
+     * @throws EntityNotFoundException if the entity with given name and password was not found
+     */
+    T getByNamePassword(String name, String password);
 
     /**
      * Creates a new object in the repository with corresponding fields
@@ -35,14 +41,16 @@ public interface EntityRepository<T extends StoredById> {
     /**
      * Updates an object in the repository
      * @param obj Information about the object to be updated
-     * @throws EntityIdNotFoundException If the object with corresponding id was not found
+     * @throws EntityNotFoundException If the object with corresponding id was not found
      */
     void update(T obj);
 
     /**
      * Deletes an object with the given id from the repository
      * @param id The id of the object to delete
-     * @throws EntityIdNotFoundException If the repository contains no object with the given id
+     * @throws EntityNotFoundException If the repository contains no object with the given id
      */
     void delete(long id);
+
+
 }

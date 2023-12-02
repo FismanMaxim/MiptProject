@@ -5,6 +5,7 @@ import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;
 import InMemoryRepos.InMemoryUserRepository;
+import Responses.EntityIdResponse;
 import Responses.FindUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -62,7 +63,7 @@ class UserControllerTest {
                                  .POST(
                                          HttpRequest.BodyPublishers.ofString(
                                                  """
-                                                         {"name": "testUsername", "money": 5000 }"""
+                                                         {"name": "testUsername", "password": "pass" }"""
                                          )
                                  )
                                  .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
@@ -84,7 +85,7 @@ class UserControllerTest {
          UserDTO receivedUser = findUserResponse.user();
 
          assertEquals("testUsername", receivedUser.name());
-         assertEquals(5000, receivedUser.money());
+         assertEquals("pass", receivedUser.password());
      }
 
     @Test
@@ -114,7 +115,7 @@ class UserControllerTest {
     }
 
     @Test
-    void ErrorOnUpdateUser() throws IOException, InterruptedException {
+    void errorOnUpdateUser() throws IOException, InterruptedException {
         // Update non-existing user
         HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(
@@ -131,5 +132,48 @@ class UserControllerTest {
                 );
 
         assertEquals(404, response.statusCode());
+    }
+
+    @Test
+    void getUserByNamePassword() throws IOException, InterruptedException {
+        // Create user
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"name": "testUsername", "password": "pass" }"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        EntityIdResponse createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
+
+        assertEquals(201, response.statusCode());
+        assertEquals(0, createResponse.id());
+
+        // Get by name and password
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"name\": \"testUsername\", \"password\": \"pass\"}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/auth".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+
+        FindUserResponse userResponse = mapper.readValue(response.body(), FindUserResponse.class);
+
+        assertEquals(200, response.statusCode());
+        assertEquals(userResponse.user().name(), "testUsername");
     }
 }

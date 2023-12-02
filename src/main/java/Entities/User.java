@@ -14,16 +14,18 @@ public class User implements StoredById {
      * <i>Key</i> is index of the company, <i>value</i> is the number of shares
      */
     private final Map<Long, Integer> shares;
+    private final String password;
 
 
-    public User(long id, String userName, double money) {
-        this(id, userName, money, new HashMap<>());
+    public User(long id, String userName, double money, String password) {
+        this(id, userName, money, new HashMap<>(), password);
     }
-    public User(long id, String userName, double money, Map<Long, Integer> shares) {
+    public User(long id, String userName, double money, Map<Long, Integer> shares, String password) {
         this.id = id;
         this.userName = userName;
         this.money = money;
         this.shares = shares;
+        this.password = password;
     }
 
     @Override
@@ -44,11 +46,11 @@ public class User implements StoredById {
     }
 
     public User withName(String name) {
-        return new User(id, name, money, new HashMap<>(shares));
+        return new User(id, name, money, new HashMap<>(shares), password);
     }
 
     public User withMoney(double money) {
-        return new User(id, userName, money, new HashMap<>(shares));
+        return new User(id, userName, money, new HashMap<>(shares), password);
     }
 
     public User withSharesDelta(List<ShareDelta> sharesDelta) throws NegativeSharesException {
@@ -67,7 +69,11 @@ public class User implements StoredById {
             }
         }
 
-        return new User(id, userName, money, newShares);
+        return new User(id, userName, money, newShares, password);
+    }
+
+    public User withPassword(String password) {
+        return new User(id, userName, money, new HashMap<>(shares), password);
     }
 
     @Override
@@ -91,5 +97,9 @@ public class User implements StoredById {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

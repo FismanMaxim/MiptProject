@@ -66,8 +66,8 @@ public class EntitiesCRUDTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"testName\", \"threshold\": 25, \"shares\": 100, " +
-                                                        "\"money\": 1000000, \"sharePrice\": 100}"
+                                                "{\"name\": \"testName\", \"keySharesThreshold\": 25, \"totalShares\": 100, " +
+                                                        "\"vacantShares\": 100, \"money\": 1000000, \"sharePrice\": 100, \"password\": \"companyPass\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -87,7 +87,7 @@ public class EntitiesCRUDTest {
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
                                                 """
-                                                        {"name": "testUsername", "money": 5000 }"""
+                                                        {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
@@ -99,6 +99,24 @@ public class EntitiesCRUDTest {
 
         assertEquals(201, response.statusCode());
         assertEquals(0, createResponse.id());
+
+        // Update user
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"name": "newUserName", "deltaMoney": 5000}"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
+
 
         // User buys shares
         response = HttpClient.newHttpClient()
@@ -137,24 +155,6 @@ public class EntitiesCRUDTest {
 
         assertEquals(200, response.statusCode());
 
-
-        // Update user
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .PUT(
-                                        HttpRequest.BodyPublishers.ofString(
-                                                """
-                                                        {"name": "newUserName"}"""
-                                        )
-                                )
-                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        assertEquals(200, response.statusCode());
-
         // Read company
         response = HttpClient.newHttpClient()
                 .send(
@@ -168,13 +168,13 @@ public class EntitiesCRUDTest {
         FindCompanyResponse findCompanyResponse = mapper.readValue(response.body(), FindCompanyResponse.class);
 
         assertEquals(200, response.statusCode());
-        assertEquals("newCompanyName", findCompanyResponse.companyName());
-        assertEquals(100, findCompanyResponse.totalShares());
-        assertEquals(50, findCompanyResponse.vacantShares());
-        assertEquals(25, findCompanyResponse.keyShareholderThreshold());
-        assertEquals(2000000, findCompanyResponse.money());
-        assertEquals(100, findCompanyResponse.sharePrice());
-        assertEquals(1, findCompanyResponse.users().size());
+        assertEquals("newCompanyName", findCompanyResponse.companyDTO().name());
+        assertEquals(100, findCompanyResponse.companyDTO().totalShares());
+        assertEquals(50, findCompanyResponse.companyDTO().vacantShares());
+        assertEquals(25, findCompanyResponse.companyDTO().keySharesThreshold());
+        assertEquals(2000000, findCompanyResponse.companyDTO().money());
+        assertEquals(100, findCompanyResponse.companyDTO().sharePrice());
+        assertEquals(1, findCompanyResponse.companyDTO().users().size());
 
         // Read user
         response = HttpClient.newHttpClient()

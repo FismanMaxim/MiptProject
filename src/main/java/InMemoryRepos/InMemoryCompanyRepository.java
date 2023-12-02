@@ -1,7 +1,7 @@
 package InMemoryRepos;
 
 import CustomExceptions.EntityDuplicatedException;
-import CustomExceptions.EntityIdNotFoundException;
+import CustomExceptions.EntityNotFoundException;
 import Entities.Company;
 import EntitiesRepositories.EntityRepository;
 
@@ -30,8 +30,16 @@ public class InMemoryCompanyRepository implements EntityRepository<Company> {
     public Company getById(long id) {
         Company company = companies.get(id);
         if (company == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
         return company;
+    }
+
+    @Override
+    public Company getByNamePassword(String name, String password) {
+        for (var key : companies.keySet())
+            if (companies.get(key).getCompanyName().equals(name) && companies.get(key).getPassword().equals(password))
+                return companies.get(key);
+        throw new EntityNotFoundException();
     }
 
     @Override
@@ -44,13 +52,13 @@ public class InMemoryCompanyRepository implements EntityRepository<Company> {
     @Override
     public synchronized void update(Company company) {
         if (companies.get(company.getId()) == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
         companies.put(company.getId(),  company);
     }
 
     @Override
     public void delete(long id) {
         if (companies.remove(id) == null)
-            throw new EntityIdNotFoundException();
+            throw new EntityNotFoundException();
     }
 }

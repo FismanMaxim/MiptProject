@@ -4,8 +4,10 @@ import CustomExceptions.*;
 import DTOs.CompanyDTO;
 import Entities.Company;
 import EntitiesServices.CompanyService;
+import Requests.AuthenticationRequest;
 import Responses.EntityIdResponse;
 import Responses.FindCompanyResponse;
+import Responses.GetAllCompaniesResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 import spark.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CompanyController extends EntityController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
@@ -30,6 +35,8 @@ public class CompanyController extends EntityController {
     public void initializeEndpoints() {
         createCompanyEndpoint();
         getCompanyByIdEndpoint();
+        getUserByNamePasswordEndpoint();
+        getAllCompaniesEndpoint();
         updateCompanyEndpoint();
         deleteCompanyEndpoint();
     }
@@ -81,14 +88,61 @@ public class CompanyController extends EntityController {
             try {
                 Company company = companyService.getById(id);
                 response.status(200);
-                return objectMapper.writeValueAsString(new FindCompanyResponse(
-                        company.getCompanyName(), company.getTotalShares(), company.getVacantShares(),
-                        company.getKeyShareholderThreshold(), company.getMoney(), company.getSharePrice(),
-                        company.getUsersDTOs()
-                ));
+                return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find company by id, id=" + id,
+                        response,
+                        e,
+                        404);
+            }
+        });
+    }
+
+    void getUserByNamePasswordEndpoint() {
+        service.post("/api/company/auth", (Request request, Response response) -> {
+            response.type("application.json");
+
+            AuthenticationRequest authenticateRequest;
+            try {
+                authenticateRequest = objectMapper.readValue(request.body(), AuthenticationRequest.class);
+            } catch (JsonProcessingException e) {
+                return InformOfClientError(LOGGER,
+                        "Failed to read body: " + request.body(),
+                        response,
+                        e,
+                        400);
+            }
+
+            try {
+                Company company = companyService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                response.status(200);
+                return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
+            } catch (GetEntityException e) {
+                return InformOfClientError(LOGGER,
+                        "Failed to find user with given username and password",
+                        response,
+                        e,
+                        404);
+            }
+        });
+    }
+
+    private void getAllCompaniesEndpoint() {
+        service.get("/api/company", (Request request, Response response) -> {
+            response.type("application.json");
+
+            try {
+                List<Company> companies = companyService.getAll();
+                List<FindCompanyResponse> listResponse = new ArrayList<>();
+                for (Company company : companies)
+                    listResponse.add(new FindCompanyResponse(new CompanyDTO(company)));
+
+                response.status(200);
+                return objectMapper.writeValueAsString(new GetAllCompaniesResponse(listResponse));
+            } catch (GetEntityException e) {
+                return InformOfClientError(LOGGER,
+                        "Failed to get all companies",
                         response,
                         e,
                         404);
