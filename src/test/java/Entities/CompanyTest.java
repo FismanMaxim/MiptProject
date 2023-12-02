@@ -1,6 +1,7 @@
 package Entities;
 
 import CustomExceptions.NegativeSharesException;
+import DTOs.UserDTO;
 import Requests.ShareDelta;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ class CompanyTest {
         var keyShareholders = company.getKeyShareholders();
 
         // Assert
-        assertEquals(List.of(user2), keyShareholders);
+        assertEquals(List.of(new UserDTO(user2)), keyShareholders);
     }
 
     @Test
