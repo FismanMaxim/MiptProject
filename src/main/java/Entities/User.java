@@ -18,16 +18,25 @@ public class User implements StoredById {
     private final String password;
 
 
-    public User(long id, String userName, double money, String password = "default") {
+    public User(long id, String userName, double money, String password) {
         this(id, userName, money, new HashMap<>(), password);
     }
-    public User(long id, String userName, double money, Map<Long, Integer> shares, String password= "default") {
+
+    public User(long id, String userName, double money, Map<Long, Integer> shares, String password) {
 
         this.id = id;
         this.userName = userName;
         this.money = money;
         this.shares = shares;
         this.password = password;
+    }
+
+    public User(long id, String userName, double money) {
+        this(id, userName, money, new HashMap<>(), "default");
+    }
+
+    public User(long id, String userName, double money, Map<Long, Integer> shares) {
+        this(id, userName, money, shares, "default");
     }
 
     @Override
@@ -46,6 +55,7 @@ public class User implements StoredById {
     public Map<Long, Integer> getShares() {
         return shares;
     }
+
     public User withName(String name) {
         return new User(id, name, money, new HashMap<>(shares), password);
     }
@@ -103,4 +113,5 @@ public class User implements StoredById {
     public String getPassword() {
         return password;
     }
+
 }

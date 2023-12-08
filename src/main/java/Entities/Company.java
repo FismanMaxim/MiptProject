@@ -17,18 +17,18 @@ public class Company implements StoredById {
     private final Set<UserDTO> users;
 
     public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
-                   long money, long sharePrice, String password = "default") {
+                   long money, long sharePrice, String password) {
         this(id, companyName, totalShares, totalShares, keyShareholderThreshold, money, sharePrice, password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, String password = "default") {
+                   int keyShareholderThreshold, long money, long sharePrice, String password) {
         this(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, new HashSet<>(), password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users, String password = "default") {
+                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users, String password) {
         this.id = id;
         this.companyName = companyName;
         this.totalShares = totalShares;
@@ -38,6 +38,25 @@ public class Company implements StoredById {
         this.money = money;
         this.sharePrice = sharePrice;
         this.users = users;
+        this.password = password;
+    }
+
+    public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
+                   long money, long sharePrice) {
+        this(id, companyName, totalShares, totalShares,
+                keyShareholderThreshold, money, sharePrice, "undefined");
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   int keyShareholderThreshold, long money, long sharePrice) {
+        this(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
+                money, sharePrice, new HashSet<>(), "undefined");
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users) {
+        this(id, companyName, totalShares, vacantShares, keyShareholderThreshold, money,
+                sharePrice, users, "default");
     }
 
     @Override
@@ -80,6 +99,7 @@ public class Company implements StoredById {
         }
         return list;
     }
+
     public Set<UserDTO> getUsersDTOs() {
         return new HashSet<>(users);
     }
@@ -91,6 +111,7 @@ public class Company implements StoredById {
         return new Company(id, name, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, users, password);
     }
+
     public Company withCountShares(int countShares, boolean preserveVacantShares) {
         if (countShares < this.totalShares)
             throw new IllegalArgumentException("Total number of shares cannot decrease");
@@ -98,6 +119,7 @@ public class Company implements StoredById {
         return new Company(id, companyName, countShares, preserveVacantShares ? vacantShares : countShares, keyShareholderThreshold,
                 money, sharePrice, users, password);
     }
+
     public Company withThreshold(int threshold) {
         if (threshold <= 0 || threshold > totalShares)
             throw new IllegalArgumentException("Key shareholder threshold must lie within (0, totalShares]");
@@ -105,6 +127,7 @@ public class Company implements StoredById {
         return new Company(id, companyName, totalShares, vacantShares, threshold, money,
                 sharePrice, users, password);
     }
+
     public Company withMoney(long money) {
         if (money < 0)
             throw new IllegalArgumentException("Amount of money must be non-negative");
@@ -166,6 +189,7 @@ public class Company implements StoredById {
         Company company = (Company) o;
         return id == company.id;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
