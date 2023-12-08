@@ -1,7 +1,5 @@
 package Entities;
 
-import DTOs.UserDTO;
-
 import java.util.*;
 
 public class Company implements StoredById {
@@ -14,30 +12,60 @@ public class Company implements StoredById {
     private final String password;
 
     private final long sharePrice;
-    private final Set<UserDTO> users;
+    private final Set<User> users;
 
     public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
-                   long money, long sharePrice, String password = "default") {
+                   long money, long sharePrice, String password) {
         this(id, companyName, totalShares, totalShares, keyShareholderThreshold, money, sharePrice, password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, String password = "default") {
+                   int keyShareholderThreshold, long money, long sharePrice, String password) {
         this(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, new HashSet<>(), password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users, String password = "default") {
+                   int keyShareholderThreshold, long money, long sharePrice, Set<User> users, String password) {
         this.id = id;
         this.companyName = companyName;
         this.totalShares = totalShares;
         this.vacantShares = vacantShares;
-        this.keyShareholderThreshold =
-                Math.round(totalShares * keyShareholderThreshold);
+        this.keyShareholderThreshold = keyShareholderThreshold;
         this.money = money;
         this.sharePrice = sharePrice;
         this.users = users;
+        this.password = password;
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   float keyShareholderThresholdPercentage, long money, long sharePrice, Set<User> users, String password) {
+        this(id, companyName, totalShares, vacantShares,
+                (int) Math.ceil(keyShareholderThresholdPercentage * totalShares), money, sharePrice, users, password);
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   float keyShareholderThresholdPercentage, long money, long sharePrice, Set<User> users) {
+        this(id, companyName, totalShares, vacantShares,
+                (int) Math.ceil(keyShareholderThresholdPercentage * totalShares), money, sharePrice, users, "default");
+    }
+
+    public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
+                   long money, long sharePrice) {
+        this(id, companyName, totalShares, totalShares,
+                keyShareholderThreshold, money, sharePrice, "default");
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   int keyShareholderThreshold, long money, long sharePrice) {
+        this(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
+                money, sharePrice, new HashSet<>(), "default");
+    }
+
+    public Company(long id, String companyName, int totalShares, int vacantShares,
+                   int keyShareholderThreshold, long money, long sharePrice, Set<User> users) {
+        this(id, companyName, totalShares, vacantShares, keyShareholderThreshold, money,
+                sharePrice, users, "default");
     }
 
     @Override
@@ -80,7 +108,8 @@ public class Company implements StoredById {
         }
         return list;
     }
-    public Set<UserDTO> getUsersDTOs() {
+
+    public Set<User> getCopyOfUsers() {
         return new HashSet<>(users);
     }
 
@@ -91,6 +120,7 @@ public class Company implements StoredById {
         return new Company(id, name, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, users, password);
     }
+
     public Company withCountShares(int countShares, boolean preserveVacantShares) {
         if (countShares < this.totalShares)
             throw new IllegalArgumentException("Total number of shares cannot decrease");
@@ -98,6 +128,7 @@ public class Company implements StoredById {
         return new Company(id, companyName, countShares, preserveVacantShares ? vacantShares : countShares, keyShareholderThreshold,
                 money, sharePrice, users, password);
     }
+
     public Company withThreshold(int threshold) {
         if (threshold <= 0 || threshold > totalShares)
             throw new IllegalArgumentException("Key shareholder threshold must lie within (0, totalShares]");
@@ -105,6 +136,7 @@ public class Company implements StoredById {
         return new Company(id, companyName, totalShares, vacantShares, threshold, money,
                 sharePrice, users, password);
     }
+
     public Company withMoney(long money) {
         if (money < 0)
             throw new IllegalArgumentException("Amount of money must be non-negative");
@@ -119,24 +151,24 @@ public class Company implements StoredById {
     }
 
     public Company withNewUser(User user) {
-        Set<UserDTO> newUsers = new HashSet<>(users);
-        newUsers.add(new UserDTO(user));
+        Set<User> newUsers = new HashSet<>(users);
+        newUsers.add(user);
         return new Company(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, newUsers, password);
     }
 
     public Company withoutUser(User user) {
-        Set<UserDTO> newUsers = new HashSet<>(users);
-        if (!newUsers.remove(new UserDTO(user)))
+        Set<User> newUsers = new HashSet<>(users);
+        if (!newUsers.remove(user))
             throw new IllegalArgumentException();
         return new Company(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, newUsers, password);
     }
 
-    public List<UserDTO> getKeyShareholders() {
-        List<UserDTO> keyShareholders = new ArrayList<>();
+    public List<User> getKeyShareholders() {
+        List<User> keyShareholders = new ArrayList<>();
         for (var holder : users) {
-            if (holder.shares().get(id) >= keyShareholderThreshold) {
+            if (holder.countSharesOfCompany(id) >= keyShareholderThreshold) {
                 keyShareholders.add(holder);
             }
         }
@@ -166,6 +198,7 @@ public class Company implements StoredById {
         Company company = (Company) o;
         return id == company.id;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);

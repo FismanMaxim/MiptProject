@@ -1,7 +1,6 @@
 import Entities.Company;
 import Entities.User;
 import database.Database;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,7 +10,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,11 +22,11 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-/*        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
                         "://cornelius.db.elephantsql.com:5432/hmtdjque",
                 "hmtdjque",
-                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));*/
-        database = new Database();
+                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        // database = new Database();
         database.connection.prepareStatement("DROP table users;DROP table " +
                 "companies;CREATE TABLE users (\n" +
                 "                       id SERIAL PRIMARY KEY,\n" +
@@ -83,7 +81,7 @@ public class DatabaseTest {
         assertEquals(testUser.getId(), retrievedUser.getId());
         assertEquals(testUser.getUserName(), retrievedUser.getUserName());
         assertEquals(testUser.getMoney(), retrievedUser.getMoney());
-        assertEquals(testUser.getShares(), retrievedUser.getShares());
+        assertEquals(testUser.getCopyOfShares(), retrievedUser.getCopyOfShares());
     }
 
     @Test
@@ -102,7 +100,7 @@ public class DatabaseTest {
         assertEquals(testUser.getId(), retrievedUser.getId());
         assertEquals(testUser.getUserName(), retrievedUser.getUserName());
         assertEquals(testUser.getMoney(), retrievedUser.getMoney());
-        assertEquals(testUser.getShares(), retrievedUser.getShares());
+        assertEquals(testUser.getCopyOfShares(), retrievedUser.getCopyOfShares());
     }
 
     @Test
@@ -254,31 +252,6 @@ public class DatabaseTest {
         assertNull(deletedCompany);
     }
 
-    public void testInMemoryCompanyUpdateUsersForCompany() {
-        // Create a company and add it to the database
-        Company testCompany = new Company(1, "TestCompany", 100, 50, 0.5F, 1000, 10, new HashSet<>());
-        database.company.create(testCompany);
-
-        // Create users and add them to the company
-        User user1 = new User(101, "User101", 100.0, new HashMap<>());
-        User user2 = new User(102, "User102", 150.0, new HashMap<>());
-        Set<User> users = new HashSet<>();
-        users.add(user1);
-        users.add(user2);
-
-        //database.company.updateUsersForCompany(1, users); //todo qusetion: do
-        // we need this open?
-
-        // Retrieve the updated company
-        Company updatedCompany = database.company.getById(1);
-
-        // Check if the users were added to the company
-        assertNotNull(updatedCompany);
-        assertEquals(2, updatedCompany.getUsers().size());
-        assertTrue(updatedCompany.getUsers().contains(user1));
-        assertTrue(updatedCompany.getUsers().contains(user2));
-    }
-
     @Test
     public void testInMemoryUserUpdate() {
         // Create a user and add it to the database
@@ -286,7 +259,7 @@ public class DatabaseTest {
         database.user.create(testUser);
 
         // Update the user
-        testUser = new User(1, "UpdatedUser", 150.0, testUser.getShares());
+        testUser = new User(1, "UpdatedUser", 150.0, testUser.getCopyOfShares());
         database.user.update(testUser);
 
         // Retrieve the updated user

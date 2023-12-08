@@ -54,39 +54,39 @@ class UserControllerTest {
         service.awaitStop();
     }
 
-     @Test
-     void getUserByIdTest() throws IOException, InterruptedException {
-         // Create user
-         HttpClient.newHttpClient()
-                 .send(
-                         HttpRequest.newBuilder()
-                                 .POST(
-                                         HttpRequest.BodyPublishers.ofString(
-                                                 """
-                                                         {"name": "testUsername", "password": "pass" }"""
-                                         )
-                                 )
-                                 .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
-                                 .build(),
-                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                 );
+    @Test
+    void getUserByIdTest() throws IOException, InterruptedException {
+        // Create user
+        HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"name": "testUsername", "password": "pass" }"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
 
-         // Get user
-         HttpResponse<String> response = HttpClient.newHttpClient()
-                 .send(
-                         HttpRequest.newBuilder()
-                                 .GET()
-                                 .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
-                                 .build(),
-                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                 );
+        // Get user
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .GET()
+                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
 
-         FindUserResponse findUserResponse = mapper.readValue(response.body(), FindUserResponse.class);
-         UserDTO receivedUser = findUserResponse.user();
+        FindUserResponse findUserResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        UserDTO receivedUser = findUserResponse.user();
 
-         assertEquals("testUsername", receivedUser.name());
-         assertEquals("pass", receivedUser.password());
-     }
+        assertEquals("testUsername", receivedUser.name());
+        assertEquals("pass", receivedUser.password());
+    }
 
     @Test
     void errorOnCreateUser() {

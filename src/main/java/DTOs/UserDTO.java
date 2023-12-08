@@ -4,9 +4,7 @@ import Entities.User;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public record UserDTO(String name, double money, Map<Long, Integer> shares, String password) implements EntityDTO<User> {
     @JsonCreator
@@ -27,7 +25,7 @@ public record UserDTO(String name, double money, Map<Long, Integer> shares, Stri
     }
 
     public UserDTO(User user) {
-        this(user.getUserName(), user.getMoney(), user.getShares(), user.getPassword());
+        this(user.getUserName(), user.getMoney(), user.getCopyOfShares(), user.getPassword());
     }
 
     @Override

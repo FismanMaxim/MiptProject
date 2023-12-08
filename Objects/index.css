@@ -1,0 +1,537 @@
+@font-face{
+	font-family: Neon;
+	src: url("ANESA.ttf");
+}
+:root {
+  --main-color: rgb(60, 60, 60);
+  --input-color: #8e8e8e;
+}
+body {
+	width: 100vw;
+	height: 100vh;
+	background: var(--main-color);
+	font-family: Neon;
+}
+* {
+	padding: 0;
+	margin: 0;
+}
+.flexable {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.clickable {
+	cursor: pointer;
+}
+.header {
+	position: relative;
+	width: 100%;
+	height: 80px;
+	background: black;
+	justify-content: space-between;
+	z-index: 100;
+}
+.logoContainer {
+	width: 260px;
+	height: 80px;
+	justify-content: space-between;
+	margin-left: 20px;
+	color: white;
+}
+.logoIconContainer {
+	width: 80px;
+	height: 80px;
+	background: var(--main-color);
+	box-shadow: 0px 0px 3px 3px black;
+}
+.logo {
+	width: 60px;
+	height: 60px;
+	font-size: 20px;
+	background: url('Images/mtsLogo.png') no-repeat center center / cover;
+}
+.logoNameContainer {
+	width: 180px;
+	height: 50px;
+	background: var(--main-color);
+}
+.logoName {
+	transition: 0.5s;
+	width: 100px;
+	height: 30px;
+	border-left: 2px solid red;
+	justify-content: flex-start;
+	padding-left: 10px;
+	font-size: 25px;
+	color: red;
+}
+.logoContainer:hover > .logoNameContainer > .logoName {
+	width: 180px;
+}
+.registerContainer {
+	width: 250px;
+	height: 80px;
+	flex-direction: column;
+	justify-content: flex-end;
+	margin-right: 20px;
+	color: white;
+}
+.rButtonContainer {
+	height: 70px;
+	width: 220px;
+}
+.rDecorBlock {
+	width: 220px;
+	border-bottom: 8px solid var(--main-color);
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+}
+.button {
+	transition: 0.5s;
+	color: white;
+}
+.button:hover {
+	color: red;
+}
+.signInButton {
+	width: 100px;
+	height: 40px;
+	background: var(--main-color);
+	margin-right: 5px;
+	border: 1px solid red;
+}
+.signUpButton {
+	width: 100px;
+	height: 50px;
+	background: var(--main-color);
+	margin-left: 5px;
+}
+main {
+	width: 100%;
+	height: calc(100% - 140px);
+	color: white;
+}
+.mainContainer {
+	width: 100%;
+	height: 100%;
+	flex-direction: column;
+	justify-content: flex-start;
+	overflow: scroll;
+}
+.mainContainer::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+}
+.mainInfoContainer {
+	margin-top: 70px;
+	min-height: 80px;
+	min-width: 400px;
+	background: black;
+	margin-right: max(80vw - 400px, 0px);
+	justify-content: flex-start;
+	transform: rotate(5deg);
+}
+.mainInfo {
+	transition: 0.5s;
+	height: 70px;
+	width: 300px;
+	margin-left: 20px;
+	background: var(--main-color);
+	font-size: 30px;
+}
+.mainInfoContainer:hover > .mainInfo {
+	margin-left: 80px;
+}
+.mainReviewTabs {
+	margin-top: 70px;
+	min-width: 800px;
+	min-height: 50px;
+	background: black;
+	align-items: flex-start;
+	justify-content: flex-start;
+	font-size: 20px;
+}
+.reviewButton {
+	transition: 0.5s;
+	width: 120px;
+	height: 40px;
+	background: var(--main-color);
+	color: white;
+	margin-left: 10px;
+}
+.reviewButton:hover {
+	color: red;
+}
+#activeReviewButton {
+	margin-top: 10px;
+}
+.mainReviewTableContainer {
+	min-width: 800px;
+	min-height: calc(100vh - 280px);
+	background: black;
+	align-items: flex-start;
+	margin-bottom: 70px;
+}
+.mainReviewTable {
+	width: 780px;
+	height: calc(100% - 10px);
+	background: var(--main-color);
+	overflow: scroll;
+}
+.mainReviewTable::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+}
+.mainReviewTable > * {
+	display: none;
+}
+#activeReviewBlock {
+	display: block;
+}
+.sharesBlock {
+	width: 100%;
+	height: 100%;
+	border-spacing: 0px;
+}
+.sharesBlock tr th {
+	position: sticky;
+	top: 0px;
+	background: black;
+	color: white;
+	border: 2px solid black;
+	width: 260px;
+	height: 40px;
+	z-index: 10;
+}
+.sharesBlock tr td {
+	position: relative;
+	margin-left: 20px;
+	color: white;
+	padding-left: 10px;
+	width: 260px;
+	height: 40px;
+}
+.sharesBlock tr:not(:last-child) td {
+	border-bottom: 2px solid black;
+}
+.sharesBlock tr:hover td {
+	background: rgb(90, 90, 90);
+}
+.sharesBlock tr:hover td:first-child {
+	color: red;
+}
+.editButton {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	width: 26px;
+	height: 26px;
+	border: 1px solid black;
+	border-radius: 4px;
+	background: url('Images/editButtonIcon.png') var(--main-color) no-repeat center center / 80%;
+}
+.editButton:hover {
+	border: 1px solid white;
+	background: url('Images/editButtonIcon.png') rgb(90, 90, 90) no-repeat center center / 80%;
+}
+.transactionConfirmBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 170;
+}
+.transactionCBG {
+	transition: 0.5s;
+	width: 100%;
+	height: 100%;
+	background: rgba(90, 60, 60, 0.8);
+}
+.sharesConfirmForm:hover + .transactionCBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.sharesConfirmForm {
+	display: flex;
+}
+.sharesConfirmContainer {
+	position: absolute;
+	width: 250px;
+	height: 120px;
+	left: 50%;
+	top: 50%;
+	flex-direction: column;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.sharesTransactionConfirnButton {
+	width: 90%;
+}
+.sharesTransactionConfirmBuyButton {
+	height: 50px;
+	transition: 0.5s;
+	font-size: 25px;
+	color: white;
+}
+.sharesTransactionConfirmBuyButton:hover {
+	color: red;
+}
+.sharesTransactionConfirmSelButton {
+	height: 50px;
+	transition: 0.5s;
+	font-size: 25px;
+	color: white;
+}
+.sharesTransactionConfirmSelButton:hover {
+	color: red;
+}
+.lInputSharesDelta {
+	text-align: center;
+}
+.transactionBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 150;
+}
+.transactionBG {
+	transition: 0.5s;
+	width: 100%;
+	height: 100%;
+	background: rgba(90, 60, 60, 0.8);
+}
+.sharesUpdateForm:hover + .transactionBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.sharesUpdateForm {
+	display: flex;
+}
+.sharesUpdateContainer {
+	position: absolute;
+	width: 450px;
+	height: 120px;
+	left: 50%;
+	top: 50%;
+	flex-direction: column;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.transactionCompanyName {
+	width: 450px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.transactionCompanyCost {
+	width: 550px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.transactionUserBalance {
+	width: 650px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 20px;
+}
+.transactionButtonsBlock {
+	width: 90%;
+	min-height: 100px;
+	justify-content: space-between;
+	color: white;
+	font-size: 30px;
+}
+.tButton {
+	transition: 0.5s;
+	width: 40%;
+	min-height: 60px;
+	background: var(--main-color);
+	color: white;
+	font-size: 15px;
+}
+.tButton:hover {
+	color: red;
+}
+.registerBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: none;
+	z-index: 10;
+}
+.registerBG {
+	width: 100%;
+	height: 100%;
+	background: rgba(60, 60, 60, 0.8);
+}
+.registerDataContainer {
+	position: absolute;
+	width: 500px;
+	
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.rdc {
+	height: 425px;
+}
+.ldc {
+	height: 320px;
+}
+.registerForm {
+	display: none;
+}
+.loginForm {
+	display: none;
+}
+.registerNameBlock {
+	width: 100%;
+	height: 85px;
+}
+.registerName {
+	margin-left: -50px;
+	margin-top: 50px;
+	width: 600px;
+	height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.registerFormContainer {
+	width: 100%;
+	flex-direction: column;
+}
+.rfc {
+	height: 270px;
+}
+.lfc {
+	height: 170px;
+}
+.registerInput {
+	width: 90%;
+	height: 50px;
+	border-bottom: 2px solid black;
+}
+.input {
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	color: white;
+	font-size: 20px;
+	outline: none;
+	border: 0px solid black;
+}
+.input::-webkit-input-placeholder {
+	transition: 0.5s;
+    color: var(--input-color);
+ }
+.registerToggle {
+	width: 90%;
+	height: 50px;
+	border-bottom: 2px solid black;
+}
+.rToggleText {
+	height: 50px;
+	color: white;
+	font-size: 20px;
+	float: left;
+}
+.toggle {
+	width: 50px;
+	height: 50px;
+	float: left;
+	margin: 0px 10px;
+}
+input {
+	font-family: Neon;
+}
+.submitButtonContainer {
+	position: absolute;
+	bottom: -60px;
+	width: 100%;
+	height: 50px;
+}
+.submitButton {
+	width: 200px;
+	height: 40px;
+	background: var(--main-color);
+}
+.submit {
+	color: white;
+	font-size: 30px;
+}
+.submit:hover {
+	color: red;
+}
+
+
+.footer {
+	position: absolute;
+	width: 100%;
+	height: 60px;
+	bottom: 0;
+	background: black;
+	border-top: 2px solid red;
+	justify-content: flex-end;
+	z-index: 100;
+}
+.contactsContainer {
+	height: 40px;
+	width: 280px;
+	margin-right: 50px;
+	background: var(--main-color);
+	justify-content: space-around;
+}
+.contactsText {
+	width: 110px;
+	height: 30px;
+	border-left: 2px solid red;
+	font-size: 20px;
+	color: red;
+}
+.contactsTextBlock {
+	transition: 0.5s;
+	margin-left: 0;
+}
+.contactsText:hover > .contactsTextBlock{
+	margin-left: 30px;
+}
+.contacts {
+	width: 120px;
+	height: 50px;
+	background: var(--main-color);
+	justify-content: space-around;
+}
+.contactsBlock {
+	transition: 0.5s;
+	width: 40px;
+	height: 40px;	
+	border: 2px solid transparent;
+}
+.contactsBlock:hover {
+	border: 2px solid red;
+}
+.contactsBlock > a > div {
+	width: 100%;
+	height: 100%;
+}
+.vkIcon {
+	background: url('Images/vkIcon.png') no-repeat center center / 120%;
+}
+.tgIcon {
+	background: url('Images/tgIcon.png') no-repeat center center / 120%;
+}
