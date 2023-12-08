@@ -22,11 +22,11 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-/*        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
                         "://cornelius.db.elephantsql.com:5432/hmtdjque",
                 "hmtdjque",
-                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));*/
-        database = new Database();
+                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        // database = new Database();
         database.connection.prepareStatement("DROP table users;DROP table " +
                 "companies;CREATE TABLE users (\n" +
                 "                       id SERIAL PRIMARY KEY,\n" +
