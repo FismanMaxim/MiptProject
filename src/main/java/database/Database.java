@@ -16,6 +16,8 @@ public class Database {
     String password = "mypassword";
 
     public Connection connection;
+    final public InMemoryUser user = new InMemoryUser();
+    public InMemoryCompany company = new InMemoryCompany();
 
     public Database() {
         try {
@@ -26,7 +28,7 @@ public class Database {
         }
     }
 
-    private String Hstoryfy(Map<Long, Integer> map) {
+    static private String Hstoryfy(Map<Long, Integer> map) {
         StringBuilder stringBuilder = new StringBuilder();
         for (var i : map.entrySet()) {
             stringBuilder.append(String.format("'\"%s\"=>\"%s\"',",
@@ -61,7 +63,7 @@ public class Database {
                         "FROM users WHERE id = ?";
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(selectUserByIdQuery);
-                // Установка значения параметра (замените user_id на конкретный идентификатор пользователя)
+                // Установка значения параметра
                 preparedStatement.setLong(1, id);
 
                 // Выполнение запроса и получение результата
@@ -196,7 +198,7 @@ public class Database {
                         long sharePrice = resultSet.getLong("share_price");
 
                         // Получение списка пользователей
-                        Set<User> users = getUsersForCompany(connection, id);
+                        Set<User> users = getUsersForCompany(id);
 
                         Company company = new Company(id, companyName, totalShares, vacantShares,
                                 keyShareholderThreshold, money, sharePrice, users);
@@ -212,7 +214,7 @@ public class Database {
             return companies;
         }
 
-        private Set<User> getUsersForCompany(Connection connection, long companyId) throws SQLException {
+        private Set<User> getUsersForCompany(long companyId) throws SQLException {
             Set<User> users = new HashSet<>();
 
             // SQL-запрос для получения пользователей, связанных с компанией
@@ -268,7 +270,7 @@ public class Database {
                         long sharePrice = resultSet.getLong("share_price");
 
                         // Получение списка пользователей
-                        Set<User> users = getUsersForCompany(connection, id);
+                        Set<User> users = getUsersForCompany(id);
 
                         company = new Company(id, companyName, totalShares, vacantShares,
                                 keyShareholderThreshold, money, sharePrice, users);
@@ -326,7 +328,7 @@ public class Database {
                 preparedStatement.executeUpdate();
 
                 // Обновление связей с пользователями
-                updateUsersForCompany(connection, company.getId(), company.getUsers());
+                updateUsersForCompany(company.getId(), company.getUsers());
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -334,17 +336,20 @@ public class Database {
         }
 
         // Вспомогательный метод для обновления связей компании с пользователями
-        private void updateUsersForCompany(Connection connection,
-                                           long companyId, Set<User> users) throws SQLException {//todo
+        private void updateUsersForCompany(long companyId, Set<User> users) {
             // SQL-запрос для удаления текущих связей компании с пользователями
             String deleteUsersForCompanyQuery = "DELETE users FROM companies " +
                     "WHERE id = ?";
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteUsersForCompanyQuery)) {
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(deleteUsersForCompanyQuery);
                 preparedStatement.setLong(1, companyId);
 
                 // Удаление текущих связей
                 preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             // Добавление новых связей
@@ -414,6 +419,5 @@ public class Database {
 
 
     }
-
 
 }
