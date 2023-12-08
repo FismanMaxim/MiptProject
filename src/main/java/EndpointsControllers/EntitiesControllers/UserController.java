@@ -1,4 +1,4 @@
-package EntitiesControllers;
+package EndpointsControllers.EntitiesControllers;
 
 import CustomExceptions.*;
 import DTOs.UserDTO;
@@ -19,16 +19,13 @@ import spark.Request;
 import spark.Response;
 import spark.Service;
 
-public class UserController extends EntityController {
+public class UserController extends EntityController<UserService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-
-    private final UserService userService;
     private final CompanyService companyService;
 
     public UserController(Service service, UserService userService, CompanyService companyService, ObjectMapper objectMapper) {
-        super(service, objectMapper);
+        super(service, userService, objectMapper);
 
-        this.userService = userService;
         this.companyService = companyService;
     }
 
@@ -71,7 +68,7 @@ public class UserController extends EntityController {
             UserDTO userDTO = new UserDTO(userName.textValue(), password.textValue());
 
             try {
-                long createdId = userService.create(userDTO);
+                long createdId = entityService.create(userDTO);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {
@@ -100,7 +97,7 @@ public class UserController extends EntityController {
             }
 
             try {
-                User user = userService.getById(id);
+                User user = entityService.getById(id);
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindUserResponse(new UserDTO(user)));
             } catch (GetEntityException e) {
@@ -129,7 +126,7 @@ public class UserController extends EntityController {
             }
 
             try {
-                User user = userService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                User user = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindUserResponse(new UserDTO(user)));
             } catch (GetEntityException e) {
@@ -180,7 +177,7 @@ public class UserController extends EntityController {
 
             if (deltaMoneyNode != null) {
                 try {
-                    userService.updateMoney(id, deltaMoneyNode.longValue());
+                    entityService.updateMoney(id, deltaMoneyNode.longValue());
                 } catch (NegativeMoneyException e) {
                     return InformOfClientError(LOGGER,
                             "Failed to update money since it results in negative amount of money",
@@ -198,7 +195,7 @@ public class UserController extends EntityController {
 
             if (newNameNode != null) {
                 try {
-                    userService.updateName(id, newNameNode.textValue());
+                    entityService.updateName(id, newNameNode.textValue());
                 } catch (EntityNotFoundException e) {
                     return InformOfClientError(LOGGER,
                             "User with given id not found, id=" + id,
@@ -240,7 +237,7 @@ public class UserController extends EntityController {
                         400);
             }
 
-            User user = userService.getById(id);
+            User user = entityService.getById(id);
 
             long totalPrice = 0;
             for (int i = 0; i < addUserSharesRequest.sharesDelta().size(); i++) {
@@ -260,8 +257,8 @@ public class UserController extends EntityController {
             }
 
             try {
-                userService.updateMoney(id, -totalPrice);
-                userService.updateShares(id, addUserSharesRequest.sharesDelta());
+                entityService.updateMoney(id, -totalPrice);
+                entityService.updateShares(id, addUserSharesRequest.sharesDelta());
             } catch (EntityNotFoundException e) {
                 return InformOfClientError(LOGGER,
                         "User with given id not found, id=" + id,
@@ -298,7 +295,7 @@ public class UserController extends EntityController {
 
             User user;
             try {
-                user = userService.getById(id);
+                user = entityService.getById(id);
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find user with id " + id,
@@ -324,7 +321,7 @@ public class UserController extends EntityController {
 
 
             try {
-                userService.delete(id);
+                entityService.delete(id);
             } catch (DeleteEntityException e) {
                 return InformOfClientError(LOGGER, "Failed to delete user with given id: " + id, response, e, 404);
             }

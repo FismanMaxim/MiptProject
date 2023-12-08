@@ -1,6 +1,7 @@
-package EntitiesControllers;
+package EndpointsControllers;
 
 import DTOs.UserDTO;
+import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;

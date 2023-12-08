@@ -1,4 +1,4 @@
-package EntitiesControllers;
+package EndpointsControllers.EntitiesControllers;
 
 import CustomExceptions.*;
 import DTOs.CompanyDTO;
@@ -20,15 +20,11 @@ import spark.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyController extends EntityController {
+public class CompanyController extends EntityController<CompanyService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
 
-    private final CompanyService companyService;
-
     public CompanyController(Service service, CompanyService companyService, ObjectMapper objectMapper) {
-        super(service, objectMapper);
-
-        this.companyService = companyService;
+        super(service, companyService, objectMapper);
     }
 
     @Override
@@ -57,7 +53,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                long createdId = companyService.create(companyDTO);
+                long createdId = entityService.create(companyDTO);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {
@@ -86,7 +82,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                Company company = companyService.getById(id);
+                Company company = entityService.getById(id);
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
             } catch (GetEntityException e) {
@@ -115,7 +111,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                Company company = companyService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                Company company = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
             } catch (GetEntityException e) {
@@ -133,7 +129,7 @@ public class CompanyController extends EntityController {
             response.type("application.json");
 
             try {
-                List<Company> companies = companyService.getAll();
+                List<Company> companies = entityService.getAll();
                 List<FindCompanyResponse> listResponse = new ArrayList<>();
                 for (Company company : companies)
                     listResponse.add(new FindCompanyResponse(new CompanyDTO(company)));
@@ -178,7 +174,7 @@ public class CompanyController extends EntityController {
 
             Company company;
             try {
-                company = companyService.getById(id);
+                company = entityService.getById(id);
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find company by id: " + id,
@@ -215,7 +211,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                companyService.update(company);
+                entityService.update(company);
             } catch (UpdateEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to update company: ",
@@ -245,7 +241,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                companyService.delete(id);
+                entityService.delete(id);
             } catch (DeleteEntityException e) {
                 return InformOfClientError(LOGGER, "Failed to delete company with given id: " + id, response, e, 404);
             }
