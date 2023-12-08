@@ -70,17 +70,6 @@ public class UserController extends EntityController {
 
             UserDTO userDTO = new UserDTO(userName.textValue(), password.textValue());
 
-//            UserDTO userDTO;
-//            try {
-//                userDTO = objectMapper.readValue(request.body(), UserDTO.class);
-//            } catch (JsonProcessingException e) {
-//                return InformOfClientError(LOGGER,
-//                        "Failed to convert json string to an instance of User: " + request.body(),
-//                        response,
-//                        e,
-//                        400);
-//            }
-
             try {
                 long createdId = userService.create(userDTO);
                 response.status(201);

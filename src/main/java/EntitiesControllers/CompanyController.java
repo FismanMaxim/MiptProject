@@ -190,7 +190,8 @@ public class CompanyController extends EntityController {
             JsonNode nameNode = jsonTree.get("name");
             JsonNode deltaSharesNode = jsonTree.get("deltaShares");
             JsonNode thresholdNode = jsonTree.get("threshold");
-            JsonNode moneyNode = jsonTree.get("money");
+            JsonNode moneyNode = jsonTree.get("deltaMoney");
+            JsonNode sharePrice = jsonTree.get("sharePrice");
 
             try {
                 if (nameNode != null) {
@@ -203,7 +204,9 @@ public class CompanyController extends EntityController {
                     company = company.withThreshold(thresholdNode.intValue());
                 }
                 if (moneyNode != null)
-                    company = company.withMoney(moneyNode.longValue());
+                    company = company.withDeltaMoney(moneyNode.longValue());
+                if (sharePrice != null)
+                    company = company.withSharePrice(sharePrice.longValue());
             } catch (IllegalArgumentException e) {
                 String message = "Illegal arguments for update request: " + e;
                 LOGGER.warn(message);
