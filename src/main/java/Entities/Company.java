@@ -17,27 +17,27 @@ public class Company implements StoredById {
     private final Set<UserDTO> users;
 
     public Company(long id, String companyName, int totalShares, int keyShareholderThreshold,
-                   long money, long sharePrice, String password) {
+                   long money, long sharePrice, String password = "default") {
         this(id, companyName, totalShares, totalShares, keyShareholderThreshold, money, sharePrice, password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, String password) {
+                   int keyShareholderThreshold, long money, long sharePrice, String password = "default") {
         this(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, new HashSet<>(), password);
     }
 
     public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users, String password) {
+                   int keyShareholderThreshold, long money, long sharePrice, Set<UserDTO> users, String password = "default") {
         this.id = id;
         this.companyName = companyName;
         this.totalShares = totalShares;
         this.vacantShares = vacantShares;
-        this.keyShareholderThreshold = keyShareholderThreshold;
+        this.keyShareholderThreshold =
+                Math.round(totalShares * keyShareholderThreshold);
         this.money = money;
         this.sharePrice = sharePrice;
         this.users = users;
-        this.password = password;
     }
 
     @Override
@@ -61,13 +61,25 @@ public class Company implements StoredById {
         return keyShareholderThreshold;
     }
 
+    public Set<User> getUsers() {
+        return Set.copyOf(users);
+    }
+
     public long getMoney() {
         return money;
     }
+
     public long getSharePrice() {
         return sharePrice;
     }
 
+    public List<Long> getUserIds() {
+        List<Long> list = new ArrayList<>();
+        for (var i : users) {
+            list.add(i.getId());
+        }
+        return list;
+    }
     public Set<UserDTO> getUsersDTOs() {
         return new HashSet<>(users);
     }
@@ -154,7 +166,6 @@ public class Company implements StoredById {
         Company company = (Company) o;
         return id == company.id;
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(id);
