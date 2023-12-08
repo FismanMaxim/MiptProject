@@ -105,7 +105,9 @@ public class Database {
                         connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
                 preparedStatement.setString(4,
-                        Hstoryfy(user.getShares()));
+                        //Hstoryfy(user.getShares()));
+                        Hstoryfy(user.getCopyOfShares()));
+
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
@@ -134,7 +136,9 @@ public class Database {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(updateUserQuery);
                 // Установка значений параметров
-                preparedStatement.setString(3, Hstoryfy(user.getShares()));
+                //preparedStatement.setString(3, Hstoryfy(user.getShares()));
+                preparedStatement.setString(3, Hstoryfy(user.getCopyOfShares()));
+
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setString(1, user.getUserName());

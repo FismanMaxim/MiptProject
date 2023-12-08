@@ -261,7 +261,7 @@ public class UserController extends EntityController {
                 company = company.withVacantSharesDelta(-countShares);
                 if (countShares > 0 && !company.hasUser(user)) {
                     company = company.withNewUser(user);
-                } else if (countShares == -user.getShares().get(company.getId())) {
+                } else if (countShares + user.countSharesOfCompany(company.getId()) == 0) {
                     company = company.withoutUser(user);
                 }
 
@@ -318,10 +318,10 @@ public class UserController extends EntityController {
                         404);
             }
 
-            for (Long companyId : user.getShares().keySet()) {
+            for (Long companyId : user.getIdsOfCompaniesWithShares()) {
                 try {
                     Company company = companyService.getById(companyId);
-                    company = company.withVacantSharesDelta(user.getShares().get(companyId));
+                    company = company.withVacantSharesDelta(user.countSharesOfCompany(companyId));
                     company = company.withoutUser(user);
                     companyService.update(company);
                 } catch (GetEntityException e) {

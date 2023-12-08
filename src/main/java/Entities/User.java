@@ -2,6 +2,9 @@ package Entities;
 
 import CustomExceptions.NegativeSharesException;
 import Requests.ShareDelta;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.*;
 
@@ -22,8 +25,13 @@ public class User implements StoredById {
         this(id, userName, money, new HashMap<>(), password);
     }
 
-    public User(long id, String userName, double money, Map<Long, Integer> shares, String password) {
-
+    @JsonCreator
+    public User(
+            @JsonProperty("id") long id,
+            @JsonProperty("userName") String userName,
+            @JsonProperty("money") double money,
+            @JsonProperty("shares") Map<Long, Integer> shares,
+            @JsonProperty("password") String password) {
         this.id = id;
         this.userName = userName;
         this.money = money;
@@ -52,8 +60,18 @@ public class User implements StoredById {
         return money;
     }
 
-    public Map<Long, Integer> getShares() {
-        return shares;
+    @JsonIgnore
+    public Map<Long, Integer> getCopyOfShares() {
+        return new HashMap<>(shares);
+    }
+
+    public int countSharesOfCompany(Long companyId) {
+        return shares.getOrDefault(companyId, 0);
+    }
+
+    @JsonIgnore
+    public Set<Long> getIdsOfCompaniesWithShares() {
+        return new HashSet<>(shares.keySet());
     }
 
     public User withName(String name) {

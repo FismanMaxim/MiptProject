@@ -1,6 +1,7 @@
 package DTOs;
 
 import Entities.Company;
+import Entities.User;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
@@ -8,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public record CompanyDTO(String name, int totalShares, int vacantShares, int keySharesThreshold,
-                         long money, long sharePrice, String password, Set<UserDTO> users) implements EntityDTO<Company> {
+                         long money, long sharePrice, String password, Set<User> users) implements EntityDTO<Company> {
     @JsonCreator
     public CompanyDTO(
             @JsonProperty("name") String name,
@@ -18,7 +19,7 @@ public record CompanyDTO(String name, int totalShares, int vacantShares, int key
             @JsonProperty("money") long money,
             @JsonProperty("sharePrice") long sharePrice,
             @JsonProperty("password") String password,
-            @JsonProperty("users") Set<UserDTO> users
+            @JsonProperty("users") Set<User> users
     ) {
         this.name = name;
         this.totalShares = totalShares;
@@ -31,9 +32,9 @@ public record CompanyDTO(String name, int totalShares, int vacantShares, int key
     }
 
     public CompanyDTO(Company company) {
-        this(company.getCompanyName(), company.getTotalShares(), (company.getVacantShares()),
+        this(company.getCompanyName(), company.getTotalShares(), company.getVacantShares(),
                 company.getKeyShareholderThreshold(), company.getMoney(), company.getSharePrice(),
-                company.getPassword(), company.getUsersDTOs());
+                company.getPassword(), company.getCopyOfUsers());
     }
 
     @Override
