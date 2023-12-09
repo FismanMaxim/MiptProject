@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
+import EntitiesRepositories.EntityRepository;
 import org.postgresql.core.Encoding;
 import org.postgresql.util.HStoreConverter;
+import org.w3c.dom.Entity;
 
 public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
@@ -55,7 +57,54 @@ public class Database {
         }
     }
 
-    public class InMemoryUser {
+    public class InMemoryUser implements EntityRepository<User> {
+        private int id = 0;
+
+        @Override
+        public long generateId() {
+            return ++id;
+        }
+
+        @Override
+        public List<User> getAll() {
+            List<User> users = new ArrayList<>();
+
+            // SQL-запрос для получения всех компаний
+            String getAllUsersQuery = "SELECT * FROM users";
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getAllUsersQuery);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString("name");
+                        int money = resultSet.getInt("money");
+
+                        Map<String, String> shares;
+                        try {
+                            shares =
+                                    HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            shares = new HashMap<>();
+                        }
+                        Map<Long, Integer> sharesConverted = new HashMap<>();
+                        for (var keys : shares.entrySet()) {
+                            sharesConverted.put(Long.getLong(keys.getKey()),
+                                    Integer.valueOf(keys.getValue()));
+                        }
+                        users.add(new User(id, name, money, sharesConverted));
+
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return users;
+        }
+
+
         public User getById(long id) {
 
             try {
@@ -94,6 +143,45 @@ public class Database {
             }
         }
 
+        @Override
+        public User getByNamePassword(String name, String password) {
+
+            try {
+                String selectUserByIdQuery = "SELECT id, name, money, shares " +
+                        "FROM users WHERE name = ?";
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(selectUserByIdQuery);
+                // Установка значения параметра
+                preparedStatement.setString(1, name);
+
+                // Выполнение запроса и получение результата
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    int money = resultSet.getInt("money");
+
+                    Map<String, String> shares;
+                    try {
+                        shares =
+                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        shares = new HashMap<>();
+                    }
+                    Map<Long, Integer> sharesConverted = new HashMap<>();
+                    for (var keys : shares.entrySet()) {
+                        sharesConverted.put(Long.getLong(keys.getKey()),
+                                Integer.valueOf(keys.getValue()));
+                    }
+                    return new User(id, name, money, sharesConverted);
+                } else {
+                    System.out.println("User not found.");
+                    return null;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public void create(User user) {
 
             // SQL-запрос для добавления пользователя
@@ -105,9 +193,7 @@ public class Database {
                         connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
                 preparedStatement.setString(4,
-                        //Hstoryfy(user.getShares()));
-                        Hstoryfy(user.getCopyOfShares()));
-
+                        Hstoryfy(user.getShares()));
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
@@ -136,9 +222,7 @@ public class Database {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(updateUserQuery);
                 // Установка значений параметров
-                //preparedStatement.setString(3, Hstoryfy(user.getShares()));
-                preparedStatement.setString(3, Hstoryfy(user.getCopyOfShares()));
-
+                preparedStatement.setString(3, Hstoryfy(user.getShares()));
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setString(1, user.getUserName());
@@ -184,7 +268,15 @@ public class Database {
         }
     }
 
-    public class InMemoryCompany {
+    public class InMemoryCompany implements EntityRepository<Company> {
+
+        private int id = 0;
+
+        @Override
+        public long generateId() {
+            return ++id;
+        }
+
         public List<Company> getAll() {
             List<Company> companies = new ArrayList<>();
 
@@ -205,7 +297,8 @@ public class Database {
                         Set<User> users = getUsersForCompany(id);
 
                         Company company = new Company(id, companyName, totalShares, vacantShares,
-                                keyShareholderThreshold, money, sharePrice, users);
+                                (int)keyShareholderThreshold, money, sharePrice,
+                                users);
 
                         companies.add(company);
                     }
@@ -277,6 +370,42 @@ public class Database {
                         Set<User> users = getUsersForCompany(id);
 
                         company = new Company(id, companyName, totalShares, vacantShares,
+                                keyShareholderThreshold, money, sharePrice, users);
+                    }
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return company;
+        }
+
+        public Company getByNamePassword(String name, String password) {
+            Company company = null;
+
+            // SQL-запрос для получения компании по ID
+            String getCompanyByIdQuery = "SELECT * FROM companies WHERE name " +
+                    "= ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCompanyByIdQuery)) {
+                preparedStatement.setString(1, name);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int id = resultSet.getInt("id");
+                        int totalShares = resultSet.getInt("total_shares");
+                        int vacantShares = resultSet.getInt("vacant_shares");
+                        int keyShareholderThreshold = resultSet.getInt(
+                                "key_shareholder_threshold");
+                        long money = resultSet.getLong("money");
+                        long sharePrice = resultSet.getLong("share_price");
+
+                        // Получение списка пользователей
+                        Set<User> users = getUsersForCompany(id);
+
+                        company = new Company(id, name, totalShares,
+                                vacantShares,
                                 keyShareholderThreshold, money, sharePrice, users);
                     }
                 }
