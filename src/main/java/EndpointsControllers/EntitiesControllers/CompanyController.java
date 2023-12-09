@@ -31,7 +31,7 @@ public class CompanyController extends EntityController<CompanyService> {
     public void initializeEndpoints() {
         createCompanyEndpoint();
         getCompanyByIdEndpoint();
-        getUserByNamePasswordEndpoint();
+        getCompanyIdByNamePasswordEndpoint();
         getAllCompaniesEndpoint();
         updateCompanyEndpoint();
         deleteCompanyEndpoint();
@@ -95,7 +95,7 @@ public class CompanyController extends EntityController<CompanyService> {
         });
     }
 
-    void getUserByNamePasswordEndpoint() {
+    void getCompanyIdByNamePasswordEndpoint() {
         service.post("/api/company/auth", (Request request, Response response) -> {
             response.type("application.json");
 
@@ -111,9 +111,9 @@ public class CompanyController extends EntityController<CompanyService> {
             }
 
             try {
-                Company company = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                long companyId = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password()).getId();
                 response.status(200);
-                return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
+                return objectMapper.writeValueAsString(new EntityIdResponse(companyId));
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find user with given username and password",

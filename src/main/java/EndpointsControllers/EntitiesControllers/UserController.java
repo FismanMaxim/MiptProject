@@ -33,7 +33,7 @@ public class UserController extends EntityController<UserService> {
     public void initializeEndpoints() {
         createUserEndpoint();
         getUserByIdEndpoint();
-        getUserByNamePasswordEndpoint();
+        getUserIdByNamePasswordEndpoint();
         updateUserMoneyNameEndpoint();
         updateUserSharesEndpoint();
         deleteUserEndpoint();
@@ -110,7 +110,7 @@ public class UserController extends EntityController<UserService> {
         });
     }
 
-    void getUserByNamePasswordEndpoint() {
+    void getUserIdByNamePasswordEndpoint() {
         service.post("/api/usr/auth", (Request request, Response response) -> {
             response.type("application.json");
 
@@ -126,9 +126,9 @@ public class UserController extends EntityController<UserService> {
             }
 
             try {
-                User user = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                long userId = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password()).getId();
                 response.status(200);
-                return objectMapper.writeValueAsString(new FindUserResponse(new UserDTO(user)));
+                return objectMapper.writeValueAsString(new EntityIdResponse(userId));
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find user with given username and password",

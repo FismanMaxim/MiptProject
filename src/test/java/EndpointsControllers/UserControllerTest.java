@@ -171,10 +171,23 @@ class UserControllerTest {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
 
-
-        FindUserResponse userResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        EntityIdResponse idResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(200, response.statusCode());
+        assertEquals(idResponse.id(), 0);
+
+        // Get by retrieved id
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .GET()
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + idResponse.id()))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        FindUserResponse userResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        assertEquals(response.statusCode(), 200);
         assertEquals(userResponse.user().name(), "testUsername");
     }
 }
