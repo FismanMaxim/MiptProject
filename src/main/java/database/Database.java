@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
+import EntitiesRepositories.EntityRepository;
 import org.postgresql.core.Encoding;
 import org.postgresql.util.HStoreConverter;
 
@@ -55,11 +56,61 @@ public class Database {
         }
     }
 
-    public class InMemoryUser {
+    public class InMemoryUser implements EntityRepository<User> {
+        private int id = 0;
+
+        @Override
+        public long generateId() {
+            return ++id;
+        }
+
+        @Override
+        public List<User> getAll() {
+            List<User> users = new ArrayList<>();
+
+            // SQL-запрос для получения всех компаний
+            String getAllUsersQuery = "SELECT * FROM users";
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getAllUsersQuery);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString("name");
+                        String password = resultSet.getString("password");
+                        int money = resultSet.getInt("money");
+                        int id = resultSet.getInt("id");
+
+                        Map<String, String> shares;
+                        try {
+                            shares =
+                                    HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            shares = new HashMap<>();
+                        }
+                        Map<Long, Integer> sharesConverted = new HashMap<>();
+                        for (var keys : shares.entrySet()) {
+                            sharesConverted.put(Long.getLong(keys.getKey()),
+                                    Integer.valueOf(keys.getValue()));
+                        }
+                        users.add(new User(id, name, money, sharesConverted,
+                                password));
+
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return users;
+        }
+
+
         public User getById(long id) {
 
             try {
-                String selectUserByIdQuery = "SELECT id, name, money, shares " +
+                String selectUserByIdQuery = "SELECT * " +
                         "FROM users WHERE id = ?";
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(selectUserByIdQuery);
@@ -71,7 +122,7 @@ public class Database {
                 if (resultSet.next()) {
                     String name = resultSet.getString("name");
                     int money = resultSet.getInt("money");
-
+                    String password = resultSet.getString("password");
                     Map<String, String> shares;
                     try {
                         shares =
@@ -84,7 +135,46 @@ public class Database {
                         sharesConverted.put(Long.getLong(keys.getKey()),
                                 Integer.valueOf(keys.getValue()));
                     }
-                    return new User(id, name, money, sharesConverted);
+                    return new User(id, name, money, sharesConverted, password);
+                } else {
+                    System.out.println("User not found.");
+                    return null;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public User getByNamePassword(String name, String password) {
+
+            try {
+                String selectUserByIdQuery = "SELECT * " +
+                        "FROM users WHERE name = ? and password = ?";
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(selectUserByIdQuery);
+                // Установка значения параметра
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, password);
+
+                // Выполнение запроса и получение результата
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    int money = resultSet.getInt("money");
+                    Map<String, String> shares;
+                    try {
+                        shares =
+                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        shares = new HashMap<>();
+                    }
+                    Map<Long, Integer> sharesConverted = new HashMap<>();
+                    for (var keys : shares.entrySet()) {
+                        sharesConverted.put(Long.getLong(keys.getKey()),
+                                Integer.valueOf(keys.getValue()));
+                    }
+                    return new User(id, name, money, sharesConverted, password);
                 } else {
                     System.out.println("User not found.");
                     return null;
@@ -97,7 +187,8 @@ public class Database {
         public void create(User user) {
 
             // SQL-запрос для добавления пользователя
-            String insertUserQuery = "INSERT INTO users (id, name, money, shares) VALUES (?, ?, ?, ?)";
+            String insertUserQuery = "INSERT INTO users (id, name, money, " +
+                    "shares, password) VALUES (?, ?, ?, ?, ?)";
 
             // Создание PreparedStatement для выполнения запроса
             try {
@@ -105,14 +196,13 @@ public class Database {
                         connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
                 preparedStatement.setString(4,
-                        //Hstoryfy(user.getShares()));
                         Hstoryfy(user.getCopyOfShares()));
-
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
                 preparedStatement.setString(2, user.getUserName());
                 preparedStatement.setDouble(3, user.getMoney());
+                preparedStatement.setString(4, user.getPassword());
                 // Выполнение запроса
                 int rowsAffected = preparedStatement.executeUpdate();
 
@@ -129,22 +219,21 @@ public class Database {
 
         public void update(User user) {
             // SQL-запрос для обновления пользователя
-            String updateUserQuery = "UPDATE users SET name = ?, money = ?, shares = ? WHERE id = ?";
+            String updateUserQuery = "UPDATE users SET name = ?, money = ?, " +
+                    "shares = ?, password = ? WHERE id = ?";
 
             // Создание PreparedStatement для выполнения запроса
             try {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(updateUserQuery);
                 // Установка значений параметров
-                //preparedStatement.setString(3, Hstoryfy(user.getShares()));
                 preparedStatement.setString(3, Hstoryfy(user.getCopyOfShares()));
-
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setString(1, user.getUserName());
                 preparedStatement.setDouble(2, user.getMoney());
-                preparedStatement.setLong(3, user.getId());
-
+                preparedStatement.setString(3, user.getPassword());
+                preparedStatement.setLong(4, user.getId());
                 // Выполнение запроса
                 int rowsAffected = preparedStatement.executeUpdate();
 
@@ -184,7 +273,15 @@ public class Database {
         }
     }
 
-    public class InMemoryCompany {
+    public class InMemoryCompany implements EntityRepository<Company> {
+
+        private int id = 0;
+
+        @Override
+        public long generateId() {
+            return ++id;
+        }
+
         public List<Company> getAll() {
             List<Company> companies = new ArrayList<>();
 
@@ -195,6 +292,7 @@ public class Database {
                     while (resultSet.next()) {
                         long id = resultSet.getLong("id");
                         String companyName = resultSet.getString("name");
+                        String password = resultSet.getString("password");
                         int totalShares = resultSet.getInt("total_shares");
                         int vacantShares = resultSet.getInt("vacant_shares");
                         float keyShareholderThreshold = resultSet.getFloat("key_shareholder_threshold");
@@ -205,7 +303,8 @@ public class Database {
                         Set<User> users = getUsersForCompany(id);
 
                         Company company = new Company(id, companyName, totalShares, vacantShares,
-                                keyShareholderThreshold, money, sharePrice, users);
+                                (int) keyShareholderThreshold, money, sharePrice,
+                                users, password);
 
                         companies.add(company);
                     }
@@ -223,9 +322,7 @@ public class Database {
 
             // SQL-запрос для получения пользователей, связанных с компанией
             String getUsersForCompanyQuery = "SELECT companies.users from " +
-                    "companies " +
-                    " Where " +
-                    "companies.id = ?";
+                    "companies  Where companies.id = ?";
 
             try {
                 PreparedStatement preparedStatement =
@@ -272,12 +369,52 @@ public class Database {
                                 "key_shareholder_threshold");
                         long money = resultSet.getLong("money");
                         long sharePrice = resultSet.getLong("share_price");
+                        String password = resultSet.getString("password");
 
                         // Получение списка пользователей
                         Set<User> users = getUsersForCompany(id);
 
                         company = new Company(id, companyName, totalShares, vacantShares,
-                                keyShareholderThreshold, money, sharePrice, users);
+                                keyShareholderThreshold, money, sharePrice,
+                                users, password);
+                    }
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return company;
+        }
+
+        public Company getByNamePassword(String name, String password) {
+            Company company = null;
+
+            // SQL-запрос для получения компании по ID
+            String getCompanyByIdQuery = "SELECT * FROM companies WHERE name " +
+                    "= ? and password = ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCompanyByIdQuery)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, password);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int id = resultSet.getInt("id");
+                        int totalShares = resultSet.getInt("total_shares");
+                        int vacantShares = resultSet.getInt("vacant_shares");
+                        int keyShareholderThreshold = resultSet.getInt(
+                                "key_shareholder_threshold");
+                        long money = resultSet.getLong("money");
+                        long sharePrice = resultSet.getLong("share_price");
+
+                        // Получение списка пользователей
+                        Set<User> users = getUsersForCompany(id);
+
+                        company = new Company(id, name, totalShares,
+                                vacantShares,
+                                keyShareholderThreshold, money, sharePrice,
+                                users, password);
                     }
                 }
 
@@ -291,7 +428,10 @@ public class Database {
         public synchronized void create(Company company) {
 
             // SQL-запрос для создания компании
-            String createCompanyQuery = "INSERT INTO companies (id, name, total_shares, vacant_shares, key_shareholder_threshold, money, share_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String createCompanyQuery = "INSERT INTO companies (id, name, " +
+                    "total_shares, vacant_shares, key_shareholder_threshold, " +
+                    "money, share_price,password) VALUES (?, ?, ?, ?, ?, ?, " +
+                    "?,?)";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(createCompanyQuery)) {
                 preparedStatement.setLong(1, company.getId());
@@ -301,6 +441,7 @@ public class Database {
                 preparedStatement.setInt(5, company.getKeyShareholderThreshold());
                 preparedStatement.setLong(6, company.getMoney());
                 preparedStatement.setLong(7, company.getSharePrice());
+                preparedStatement.setString(8, company.getPassword());
 
                 // Выполнение запроса
                 preparedStatement.executeUpdate();
@@ -317,7 +458,10 @@ public class Database {
         public synchronized void update(Company company) {
 
             // SQL-запрос для обновления компании
-            String updateCompanyQuery = "UPDATE companies SET name = ?, total_shares = ?, vacant_shares = ?, key_shareholder_threshold = ?, money = ?, share_price = ? WHERE id = ?";
+            String updateCompanyQuery = "UPDATE companies SET name = ?, " +
+                    "total_shares = ?, vacant_shares = ?, " +
+                    "key_shareholder_threshold = ?, money = ?, share_price = " +
+                    "?, password = ? WHERE id = ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateCompanyQuery)) {
                 preparedStatement.setString(1, company.getCompanyName());
@@ -326,7 +470,8 @@ public class Database {
                 preparedStatement.setFloat(4, company.getKeyShareholderThreshold());
                 preparedStatement.setLong(5, company.getMoney());
                 preparedStatement.setLong(6, company.getSharePrice());
-                preparedStatement.setLong(7, company.getId());
+                preparedStatement.setString(7, company.getPassword());
+                preparedStatement.setLong(8, company.getId());
 
                 // Выполнение запроса
                 preparedStatement.executeUpdate();
@@ -342,8 +487,8 @@ public class Database {
         // Вспомогательный метод для обновления связей компании с пользователями
         private void updateUsersForCompany(long companyId, Set<User> users) {
             // SQL-запрос для удаления текущих связей компании с пользователями
-            String deleteUsersForCompanyQuery = "DELETE users FROM companies " +
-                    "WHERE id = ?";
+            String deleteUsersForCompanyQuery = "UPDATE companies SET " +
+                    "users = null WHERE id = ?";
 
             try {
                 PreparedStatement preparedStatement =
