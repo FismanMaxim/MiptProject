@@ -22,13 +22,21 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
-                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
-                "hmtdjque",
-                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
-        // database = new Database();
-        database.connection.prepareStatement("DROP table users;DROP table " +
-                "companies;CREATE TABLE users (\n" +
+//        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+//                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+//                "hmtdjque",
+//                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        database = new Database();
+        try {
+            database.connection.prepareStatement("DROP table users; DROP " +
+                    "table companies;").execute();
+        } catch (SQLException e) {
+        }
+        try {
+            database.connection.prepareStatement("create extension hstore;").execute();
+        } catch (SQLException e) {
+        }
+        database.connection.prepareStatement("CREATE TABLE users (\n" +
                 "                       id SERIAL PRIMARY KEY,\n" +
                 "                       name VARCHAR(255),\n" +
                 "                       money INT,\n" +
