@@ -1,5 +1,7 @@
-package EntitiesControllers;
+package EndpointsControllers;
 
+import EndpointsControllers.EntitiesControllers.CompanyController;
+import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;
@@ -204,6 +206,21 @@ class CompanyControllerTest {
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company/auth".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        EntityIdResponse idResponse = mapper.readValue(response.body(), EntityIdResponse.class);
+
+        assertEquals(200, response.statusCode());
+        assertEquals(idResponse.id(), 0);
+
+        // Get company be retrieved id
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .GET()
+                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + idResponse.id()))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );

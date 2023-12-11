@@ -32,18 +32,18 @@ class CompanyTest {
     @Test
     void withMethods() {
         // Assign
-        Company company = new Company(0, "testName", 100, 50, 0, 100, "Password");
+        Company company = new Company(0, "testName", 100, 50, 1000, 100, "Password");
 
         // Act
         company = company
                 .withName("newName")
-                .withMoney(1)
+                .withDeltaMoney(10)
                 .withThreshold(10)
                 .withVacantSharesDelta(10)
                 .withCountShares(1000, false);
 
         assert company.getCompanyName().equals("newName");
-        assert company.getMoney() == 1;
+        assert company.getMoney() == 1010;
         assert company.getKeyShareholderThreshold() == 10;
         assert company.getVacantShares() == 1000;
         assert company.getTotalShares() == 1000;

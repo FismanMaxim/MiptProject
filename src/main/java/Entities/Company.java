@@ -137,9 +137,17 @@ public class Company implements StoredById {
                 sharePrice, users, password);
     }
 
-    public Company withMoney(long money) {
-        if (money < 0)
+    public Company withDeltaMoney(long deltaMoney) {
+        if (money + deltaMoney < 0)
             throw new IllegalArgumentException("Amount of money must be non-negative");
+
+        return new Company(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
+                money + deltaMoney, sharePrice, users, password);
+    }
+
+    public Company withSharePrice(long sharePrice) {
+        if (sharePrice < 0)
+            throw new IllegalArgumentException("Share price cannot be illegal");
 
         return new Company(id, companyName, totalShares, vacantShares, keyShareholderThreshold,
                 money, sharePrice, users, password);
