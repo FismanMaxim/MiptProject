@@ -166,13 +166,13 @@ public class EntitiesCRUDTest {
         FindCompanyResponse findCompanyResponse = mapper.readValue(response.body(), FindCompanyResponse.class);
 
         assertEquals(200, response.statusCode());
-        assertEquals("newCompanyName", findCompanyResponse.companyDTO().name());
-        assertEquals(100, findCompanyResponse.companyDTO().totalShares());
-        assertEquals(50, findCompanyResponse.companyDTO().vacantShares());
-        assertEquals(25, findCompanyResponse.companyDTO().keySharesThreshold());
-        assertEquals(1000, findCompanyResponse.companyDTO().money());
-        assertEquals(100, findCompanyResponse.companyDTO().sharePrice());
-        assertEquals(1, findCompanyResponse.companyDTO().users().size());
+        assertEquals("newCompanyName", findCompanyResponse.company().getCompanyName());
+        assertEquals(100, findCompanyResponse.company().getTotalShares());
+        assertEquals(50, findCompanyResponse.company().getVacantShares());
+        assertEquals(25, findCompanyResponse.company().getKeyShareholderThreshold());
+        assertEquals(1000, findCompanyResponse.company().getMoney());
+        assertEquals(100, findCompanyResponse.company().getSharePrice());
+        assertEquals(1, findCompanyResponse.company().getCopyOfUsers().size());
 
         // update user one more time (adding shares and checking that vacant shares changes correctly)
 

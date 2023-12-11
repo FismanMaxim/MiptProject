@@ -1,4 +1,4 @@
-import EndpointsControllers.EntitiesControllers.CompanyController;
+ import EndpointsControllers.EntitiesControllers.CompanyController;
 import EndpointsControllers.ControllersManager;
 import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;

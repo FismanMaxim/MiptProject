@@ -1,5 +1,9 @@
 package Entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.*;
 
 public class Company implements StoredById {
@@ -25,8 +29,17 @@ public class Company implements StoredById {
                 money, sharePrice, new HashSet<>(), password);
     }
 
-    public Company(long id, String companyName, int totalShares, int vacantShares,
-                   int keyShareholderThreshold, long money, long sharePrice, Set<User> users, String password) {
+    @JsonCreator
+    public Company(
+            @JsonProperty("id") long id,
+            @JsonProperty("companyName") String companyName,
+            @JsonProperty("totalShares") int totalShares,
+            @JsonProperty("vacantShares") int vacantShares,
+            @JsonProperty("keyShareholderThreshold") int keyShareholderThreshold,
+            @JsonProperty("money") long money,
+            @JsonProperty("sharePrice") long sharePrice,
+            @JsonProperty("users") Set<User> users,
+            @JsonProperty("password") String password) {
         this.id = id;
         this.companyName = companyName;
         this.totalShares = totalShares;
@@ -101,6 +114,7 @@ public class Company implements StoredById {
         return sharePrice;
     }
 
+    @JsonIgnore
     public List<Long> getUserIds() {
         List<Long> list = new ArrayList<>();
         for (var i : users) {
@@ -109,6 +123,7 @@ public class Company implements StoredById {
         return list;
     }
 
+    @JsonIgnore
     public Set<User> getCopyOfUsers() {
         return new HashSet<>(users);
     }
@@ -173,6 +188,7 @@ public class Company implements StoredById {
                 money, sharePrice, newUsers, password);
     }
 
+    @JsonIgnore
     public List<User> getKeyShareholders() {
         List<User> keyShareholders = new ArrayList<>();
         for (var holder : users) {

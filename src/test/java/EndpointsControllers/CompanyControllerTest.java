@@ -98,7 +98,7 @@ class CompanyControllerTest {
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
                                                 "{\"name\": \"company1\", \"keySharesThreshold\": 10, \"totalShares\": 100, " +
-                                                        "\"money\": 100, \"sharePrice\": 100}"
+                                                        "\"money\": 100, \"sharePrice\": 100, \"password\": \"password\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -145,8 +145,8 @@ class CompanyControllerTest {
 
         List<FindCompanyResponse> companiesResponses = getResponse.companiesResponses();
         assertEquals(companiesResponses.size(), 2);
-        assertEquals(companiesResponses.get(0).companyDTO().name() , "company1");
-        assertEquals(companiesResponses.get(1).companyDTO().name(), "company2");
+        assertEquals(companiesResponses.get(0).company().getCompanyName() , "company1");
+        assertEquals(companiesResponses.get(1).company().getCompanyName(), "company2");
     }
 
     @Test void errorOnCreateCompany() {
@@ -228,7 +228,7 @@ class CompanyControllerTest {
         FindCompanyResponse findCompanyResponse = mapper.readValue(response.body(), FindCompanyResponse.class);
 
         assertEquals(200, response.statusCode());
-        assertEquals(findCompanyResponse.companyDTO().name(), "testName");
+        assertEquals(findCompanyResponse.company().getCompanyName(), "testName");
     }
 }
 
