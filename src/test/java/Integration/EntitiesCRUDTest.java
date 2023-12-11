@@ -1,9 +1,9 @@
 package Integration;
 
 import DTOs.UserDTO;
-import EntitiesControllers.CompanyController;
-import EntitiesControllers.ControllersManager;
-import EntitiesControllers.UserController;
+import EndpointsControllers.EntitiesControllers.CompanyController;
+import EndpointsControllers.ControllersManager;
+import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;
@@ -66,8 +66,7 @@ public class EntitiesCRUDTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"testName\", \"keySharesThreshold\": 25, \"totalShares\": 100, " +
-                                                        "\"vacantShares\": 100, \"money\": 1000000, \"sharePrice\": 100, \"password\": \"companyPass\"}"
+                                                "{\"name\": \"testName\", \"password\": \"companyPass\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -117,6 +116,23 @@ public class EntitiesCRUDTest {
 
         assertEquals(200, response.statusCode());
 
+        // Update company
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"name\": \"newCompanyName\", \"deltaMoney\": 1000, " +
+                                                        "\"deltaShares\": 100, \"sharePrice\": 100, \"threshold\": 25}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company/0".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+
+        assertEquals(200, response.statusCode());
 
         // User buys shares
         response = HttpClient.newHttpClient()
@@ -137,24 +153,6 @@ public class EntitiesCRUDTest {
         assertEquals(200, response.statusCode());
 
 
-        // Update company
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .PUT(
-                                        HttpRequest.BodyPublishers.ofString(
-                                                """
-                                                        {"name": "newCompanyName", "money": 2000000}"""
-                                        )
-                                )
-                                .uri(URI.create("http://localhost:%d/api/company/0".formatted(service.port())))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-
-        assertEquals(200, response.statusCode());
-
         // Read company
         response = HttpClient.newHttpClient()
                 .send(
@@ -172,9 +170,11 @@ public class EntitiesCRUDTest {
         assertEquals(100, findCompanyResponse.companyDTO().totalShares());
         assertEquals(50, findCompanyResponse.companyDTO().vacantShares());
         assertEquals(25, findCompanyResponse.companyDTO().keySharesThreshold());
-        assertEquals(2000000, findCompanyResponse.companyDTO().money());
+        assertEquals(1000, findCompanyResponse.companyDTO().money());
         assertEquals(100, findCompanyResponse.companyDTO().sharePrice());
         assertEquals(1, findCompanyResponse.companyDTO().users().size());
+
+        // update user one more time (adding shares and checking that vacant shares changes correctly)
 
         // Read user
         response = HttpClient.newHttpClient()

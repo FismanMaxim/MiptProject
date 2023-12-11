@@ -1,6 +1,6 @@
-import EntitiesControllers.CompanyController;
-import EntitiesControllers.ControllersManager;
-import EntitiesControllers.UserController;
+import EndpointsControllers.EntitiesControllers.CompanyController;
+import EndpointsControllers.ControllersManager;
+import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;

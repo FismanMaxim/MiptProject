@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public record  GetAllCompaniesResponse (List<FindCompanyResponse> companiesResponses) {
+public record GetAllCompaniesResponse (List<FindCompanyResponse> companiesResponses) {
     @JsonCreator
     public GetAllCompaniesResponse(
             @JsonProperty List<FindCompanyResponse> companiesResponses) {
