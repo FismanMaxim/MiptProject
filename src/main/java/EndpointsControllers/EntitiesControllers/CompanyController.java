@@ -1,4 +1,4 @@
-package EntitiesControllers;
+package EndpointsControllers.EntitiesControllers;
 
 import CustomExceptions.*;
 import DTOs.CompanyDTO;
@@ -20,22 +20,18 @@ import spark.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyController extends EntityController {
+public class CompanyController extends EntityController<CompanyService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
 
-    private final CompanyService companyService;
-
     public CompanyController(Service service, CompanyService companyService, ObjectMapper objectMapper) {
-        super(service, objectMapper);
-
-        this.companyService = companyService;
+        super(service, companyService, objectMapper);
     }
 
     @Override
     public void initializeEndpoints() {
         createCompanyEndpoint();
         getCompanyByIdEndpoint();
-        getUserByNamePasswordEndpoint();
+        getCompanyIdByNamePasswordEndpoint();
         getAllCompaniesEndpoint();
         updateCompanyEndpoint();
         deleteCompanyEndpoint();
@@ -57,7 +53,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                long createdId = companyService.create(companyDTO);
+                long createdId = entityService.create(companyDTO);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {
@@ -86,7 +82,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                Company company = companyService.getById(id);
+                Company company = entityService.getById(id);
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
             } catch (GetEntityException e) {
@@ -99,7 +95,7 @@ public class CompanyController extends EntityController {
         });
     }
 
-    void getUserByNamePasswordEndpoint() {
+    void getCompanyIdByNamePasswordEndpoint() {
         service.post("/api/company/auth", (Request request, Response response) -> {
             response.type("application.json");
 
@@ -115,9 +111,9 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                Company company = companyService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password());
+                long companyId = entityService.getByNamePassword(authenticateRequest.name(), authenticateRequest.password()).getId();
                 response.status(200);
-                return objectMapper.writeValueAsString(new FindCompanyResponse(new CompanyDTO(company)));
+                return objectMapper.writeValueAsString(new EntityIdResponse(companyId));
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find user with given username and password",
@@ -133,7 +129,7 @@ public class CompanyController extends EntityController {
             response.type("application.json");
 
             try {
-                List<Company> companies = companyService.getAll();
+                List<Company> companies = entityService.getAll();
                 List<FindCompanyResponse> listResponse = new ArrayList<>();
                 for (Company company : companies)
                     listResponse.add(new FindCompanyResponse(new CompanyDTO(company)));
@@ -178,7 +174,7 @@ public class CompanyController extends EntityController {
 
             Company company;
             try {
-                company = companyService.getById(id);
+                company = entityService.getById(id);
             } catch (GetEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to find company by id: " + id,
@@ -190,7 +186,8 @@ public class CompanyController extends EntityController {
             JsonNode nameNode = jsonTree.get("name");
             JsonNode deltaSharesNode = jsonTree.get("deltaShares");
             JsonNode thresholdNode = jsonTree.get("threshold");
-            JsonNode moneyNode = jsonTree.get("money");
+            JsonNode moneyNode = jsonTree.get("deltaMoney");
+            JsonNode sharePrice = jsonTree.get("sharePrice");
 
             try {
                 if (nameNode != null) {
@@ -203,7 +200,9 @@ public class CompanyController extends EntityController {
                     company = company.withThreshold(thresholdNode.intValue());
                 }
                 if (moneyNode != null)
-                    company = company.withMoney(moneyNode.longValue());
+                    company = company.withDeltaMoney(moneyNode.longValue());
+                if (sharePrice != null)
+                    company = company.withSharePrice(sharePrice.longValue());
             } catch (IllegalArgumentException e) {
                 String message = "Illegal arguments for update request: " + e;
                 LOGGER.warn(message);
@@ -212,7 +211,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                companyService.update(company);
+                entityService.update(company);
             } catch (UpdateEntityException e) {
                 return InformOfClientError(LOGGER,
                         "Failed to update company: ",
@@ -242,7 +241,7 @@ public class CompanyController extends EntityController {
             }
 
             try {
-                companyService.delete(id);
+                entityService.delete(id);
             } catch (DeleteEntityException e) {
                 return InformOfClientError(LOGGER, "Failed to delete company with given id: " + id, response, e, 404);
             }
