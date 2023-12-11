@@ -22,11 +22,11 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-//        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
-//                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
-//                "hmtdjque",
-//                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
-        database = new Database();
+        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+                "hmtdjque",
+                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+//        database = new Database();
         try {
             database.connection.prepareStatement("DROP table users; DROP " +
                     "table companies;").execute();
@@ -262,7 +262,7 @@ public class DatabaseTest {
 
         // remove user from company
         Company company = database.company.getById(3);
-        company.withoutUser(user1);
+        company = company.withoutUser(user1);
         database.company.update(company);
 
         assertEquals(0, database.company.getById(3).getCopyOfUsers().size());
