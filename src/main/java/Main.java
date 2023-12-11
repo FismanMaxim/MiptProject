@@ -11,10 +11,10 @@ import spark.Service;
 import java.util.List;
 public class Main {
 
-    private static ObjectMapper mapper;
-    private static Service service;
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     public static void main(String[] args) {
-        service = Service.ignite();
+        Service service = Service.ignite();
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
 
         UserService userService = new UserService(new InMemoryUserRepository());
