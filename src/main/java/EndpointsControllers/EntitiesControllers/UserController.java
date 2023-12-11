@@ -8,6 +8,7 @@ import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import Requests.AddUserSharesRequest;
 import Requests.AuthenticationRequest;
+import Requests.CreateEntityRequest;
 import Responses.EntityIdResponse;
 import Responses.FindUserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,32 +44,19 @@ public class UserController extends EntityController<UserService> {
         service.post("/api/usr", (Request request, Response response) -> {
             response.type("application.json");
 
-            JsonNode jsonTree;
+            CreateEntityRequest createRequest;
             try {
-                jsonTree = objectMapper.readTree(request.body());
+                createRequest = objectMapper.readValue(request.body(), CreateEntityRequest.class);
             } catch (JsonProcessingException e) {
                 return InformOfClientError(LOGGER,
-                        "Failed to convert body to json tree: " + request.body(),
+                        "Failed to convert json string: " + request.body(),
                         response,
                         e,
                         400);
             }
 
-            JsonNode userName = jsonTree.get("name");
-            JsonNode password = jsonTree.get("password");
-
-            if (userName == null || password == null) {
-                return InformOfClientError(LOGGER,
-                        "Not found obligatory parameters name and password",
-                        response,
-                        new IllegalArgumentException(),
-                        400);
-            }
-
-            UserDTO userDTO = new UserDTO(userName.textValue(), password.textValue());
-
             try {
-                long createdId = entityService.create(userDTO);
+                long createdId = entityService.create(createRequest);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {

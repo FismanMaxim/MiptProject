@@ -1,10 +1,10 @@
 package EndpointsControllers.EntitiesControllers;
 
 import CustomExceptions.*;
-import DTOs.CompanyDTO;
 import Entities.Company;
 import EntitiesServices.CompanyService;
 import Requests.AuthenticationRequest;
+import Requests.CreateEntityRequest;
 import Responses.EntityIdResponse;
 import Responses.FindCompanyResponse;
 import Responses.GetAllCompaniesResponse;
@@ -41,19 +41,19 @@ public class CompanyController extends EntityController<CompanyService> {
         service.post("/api/company", (Request request, Response response) -> {
             response.type("application.json");
 
-            CompanyDTO companyDTO;
+            CreateEntityRequest createRequest;
             try {
-                companyDTO = objectMapper.readValue(request.body(), CompanyDTO.class);
+                createRequest = objectMapper.readValue(request.body(), CreateEntityRequest.class);
             } catch (JsonProcessingException e) {
                 return InformOfClientError(LOGGER,
-                        "Failed to convert json string to an instance of Company: " + request.body(),
+                        "Failed to convert json string: " + request.body(),
                         response,
                         e,
                         400);
             }
 
             try {
-                long createdId = entityService.create(companyDTO);
+                long createdId = entityService.create(createRequest);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {

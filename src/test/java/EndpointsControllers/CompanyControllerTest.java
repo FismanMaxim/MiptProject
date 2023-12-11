@@ -97,8 +97,7 @@ class CompanyControllerTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"company1\", \"keySharesThreshold\": 10, \"totalShares\": 100, " +
-                                                        "\"money\": 100, \"sharePrice\": 100, \"password\": \"password\"}"
+                                                "{\"name\": \"company1\", \"password\": \"password\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -109,7 +108,24 @@ class CompanyControllerTest {
         EntityIdResponse createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(201, response.statusCode());
-        assertEquals(0, createResponse.id());
+        long id1 = createResponse.id();
+
+        // Update company
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"keySharesThreshold\": 10, \"totalShares\": 100, " +
+                                                        "\"money\": 100, \"sharePrice\": 100}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id1))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
 
         // Create another company
         response = HttpClient.newHttpClient()
@@ -117,8 +133,7 @@ class CompanyControllerTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"company2\", \"keySharesThreshold\": 10, \"totalShares\": 100, " +
-                                                        "\"money\": 100, \"sharePrice\": 100}"
+                                                "{\"name\": \"company2\", \"password\": \"password2\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -129,7 +144,24 @@ class CompanyControllerTest {
         createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(201, response.statusCode());
-        assertEquals(1, createResponse.id());
+        long id2 = createResponse.id();
+
+        // Update 2nd company
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"keySharesThreshold\": 10, \"totalShares\": 100, " +
+                                                        "\"money\": 100, \"sharePrice\": 100}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id2))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
 
         // Get all companies
         response = HttpClient.newHttpClient()
@@ -182,8 +214,7 @@ class CompanyControllerTest {
                         HttpRequest.newBuilder()
                                 .POST(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"testName\", \"keySharesThreshold\": 25, \"totalShares\": 100, " +
-                                                        "\"money\": 1000000, \"sharePrice\": 100, \"password\": \"pass\"}"
+                                                "{\"name\": \"testName\", \"password\": \"pass\"}"
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
@@ -194,7 +225,24 @@ class CompanyControllerTest {
         EntityIdResponse createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(201, response.statusCode());
-        assertEquals(0, createResponse.id());
+        long id = createResponse.id();
+
+        // Update company
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"keySharesThreshold\": 25, \"totalShares\": 100, " +
+                                                        "\"money\": 1000000, \"sharePrice\": 100}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
 
         // Get by name and password
         response = HttpClient.newHttpClient()

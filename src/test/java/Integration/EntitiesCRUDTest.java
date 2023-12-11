@@ -94,10 +94,7 @@ public class EntitiesCRUDTest {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
 
-        createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
-
         assertEquals(201, response.statusCode());
-        assertEquals(0, createResponse.id());
 
         // Update user
         response = HttpClient.newHttpClient()

@@ -8,37 +8,36 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public record CompanyDTO(String name, int totalShares, int vacantShares, int keySharesThreshold,
-                         long money, long sharePrice, String password, Set<User> users) implements EntityDTO<Company> {
+public record CompanyDTO(long id, String name, int totalShares, int vacantShares, int keySharesThreshold,
+                         long money, long sharePrice, Set<User> users) implements EntityDTO<Company> {
     @JsonCreator
     public CompanyDTO(
+            @JsonProperty("id") long id,
             @JsonProperty("name") String name,
             @JsonProperty("totalShares") int totalShares,
             @JsonProperty("vacantShares") int vacantShares,
             @JsonProperty("keySharesThreshold") int keySharesThreshold,
             @JsonProperty("money") long money,
             @JsonProperty("sharePrice") long sharePrice,
-            @JsonProperty("password") String password,
             @JsonProperty("users") Set<User> users
     ) {
+        this.id = id;
         this.name = name;
         this.totalShares = totalShares;
         this.vacantShares = vacantShares;
         this.keySharesThreshold = keySharesThreshold;
         this.money = money;
         this.sharePrice = sharePrice;
-        this.password = password;
         this.users = users == null ? new HashSet<>() : users;
     }
 
     public CompanyDTO(Company company) {
-        this(company.getCompanyName(), company.getTotalShares(), company.getVacantShares(),
-                company.getKeyShareholderThreshold(), company.getMoney(), company.getSharePrice(),
-                company.getPassword(), company.getCopyOfUsers());
+        this(company.getId(), company.getCompanyName(), company.getTotalShares(), company.getVacantShares(),
+                company.getKeyShareholderThreshold(), company.getMoney(), company.getSharePrice(), company.getCopyOfUsers());
     }
 
     @Override
-    public Company convertToTargetObject(long id) {
+    public Company convertToTargetObject(String password) {
         return new Company(id, name, totalShares, vacantShares, keySharesThreshold, money, sharePrice, users, password);
     }
 
@@ -47,11 +46,11 @@ public record CompanyDTO(String name, int totalShares, int vacantShares, int key
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CompanyDTO that = (CompanyDTO) o;
-        return Objects.equals(name, that.name) && Objects.equals(password, that.password);
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, password);
+        return Objects.hash(id);
     }
 }

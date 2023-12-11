@@ -4,6 +4,7 @@ import CustomExceptions.*;
 import DTOs.EntityDTO;
 import Entities.StoredById;
 import EntitiesRepositories.EntityRepository;
+import Requests.CreateEntityRequest;
 
 public abstract class EntityService<T extends StoredById> {
     protected final EntityRepository<T> repository;
@@ -21,17 +22,19 @@ public abstract class EntityService<T extends StoredById> {
         }
     }
 
-    public <T_DTO extends EntityDTO<T>> long create(T_DTO objDTO) {
-        long id = repository.generateId();
-        T obj = objDTO.convertToTargetObject(id);
+    private T getByNamePassword(String name, String password) {
         try {
-            repository.create(obj);
-        } catch (EntityDuplicatedException e) {
-            throw new CreateEntityException(
-                    "Cannot create entity because it duplicated existing one, id=" + obj.getId(), e);
+            return repository.getByNamePassword(name, password);
+        } catch (EntityNotFoundException e) {
+            return null;
         }
-        return id;
     }
+
+    protected boolean isNamePasswordPresent(String name, String password) {
+        return getByNamePassword(name, password) != null;
+    }
+
+    public abstract long create(CreateEntityRequest createRequest);
 
     public void update(T obj) {
         try {
