@@ -21,11 +21,11 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-//        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
-//                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
-//                "hmtdjque",
-//                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
-        database = new Database();
+        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+                "hmtdjque",
+                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+//        database = new Database();
         try {
             database.connection.prepareStatement("DROP table users; DROP " +
                     "table companies;").execute();
@@ -39,7 +39,8 @@ public class DatabaseTest {
                 "                       id SERIAL PRIMARY KEY,\n" +
                 "                       name VARCHAR(255),\n" +
                 "                       money INT,\n" +
-                "                       shares hstore\n" +
+                "                       shares hstore,\n" +
+                "                       password VARCHAR(255)\n" +
                 ");CREATE TABLE companies (\n" +
                 "                           id SERIAL PRIMARY KEY,\n" +
                 "                           users INT[],\n" +
@@ -48,7 +49,8 @@ public class DatabaseTest {
                 "                           vacant_shares INT NOT NULL,\n" +
                 "                           total_shares INT NOT NULL,\n" +
                 "                           money INT NOT NULL,\n" +
-                "                           share_price INT NOT NULL\n" +
+                "                           share_price INT NOT NULL,\n" +
+                "                           password VARCHAR(255)\n" +
                 ");").execute();
     }
 
@@ -198,7 +200,8 @@ public class DatabaseTest {
     @Test
     public void getUserByNamePassword() {
         // Create a user and add it to the database
-        User testUser = new User(1, "TestUser", 100.0, new HashMap<>(), "pass");
+        User testUser = new User(1, "TestUser", 100.0, new HashMap<>(),
+                "password");
         database.user.create(testUser);
 
         // Retrieve the user by name and password
@@ -240,7 +243,7 @@ public class DatabaseTest {
             database.user.create(users[i]);
 
             companiesIds[i] = database.company.generateId();
-            companies[i] = new Company(companiesIds[i], "companyName" + i, 100 * i, 10*i, 1000*i, 50*i, "password" + i);
+            companies[i] = new Company(companiesIds[i], "companyName" + i, 100 * i, 10 * i, 1000 * i, 50 * i, "password" + i);
             database.company.create(companies[i]);
         }
 
@@ -255,6 +258,7 @@ public class DatabaseTest {
         for (int i = 0; i < retrievedCompanies.size(); i++)
             assertSameCompanies(companies[i], retrievedCompanies.get(i));
     }
+
     @Test
     public void testInMemoryCompanyGetById() {
         // Create a company and add it to the database
