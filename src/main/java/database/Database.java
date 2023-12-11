@@ -10,7 +10,6 @@ import java.util.*;
 import EntitiesRepositories.EntityRepository;
 import org.postgresql.core.Encoding;
 import org.postgresql.util.HStoreConverter;
-import org.w3c.dom.Entity;
 
 public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
@@ -197,7 +196,7 @@ public class Database {
                         connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
                 preparedStatement.setString(4,
-                        Hstoryfy(user.getShares()));
+                        Hstoryfy(user.getCopyOfShares()));
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
@@ -228,7 +227,7 @@ public class Database {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(updateUserQuery);
                 // Установка значений параметров
-                preparedStatement.setString(3, Hstoryfy(user.getShares()));
+                preparedStatement.setString(3, Hstoryfy(user.getCopyOfShares()));
                 preparedStatement =
                         connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setString(1, user.getUserName());

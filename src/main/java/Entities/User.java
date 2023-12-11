@@ -56,10 +56,6 @@ public class User implements StoredById {
         return userName;
     }
 
-    public Map<Long, Integer> getShares() {
-        return shares;
-    }
-
     public double getMoney() {
         return money;
     }
