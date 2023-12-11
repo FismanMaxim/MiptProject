@@ -21,27 +21,35 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
-                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
-                "hmtdjque",
-                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
-        // database = new Database();
-        database.connection.prepareStatement("""
-                DROP table users;DROP table companies;CREATE TABLE users (
-                                       id SERIAL PRIMARY KEY,
-                                       name VARCHAR(255),
-                                       money INT,
-                                       shares hstore
-                );CREATE TABLE companies (
-                                           id SERIAL PRIMARY KEY,
-                                           users INT[],
-                                           name VARCHAR(255) NOT NULL,
-                                           key_shareholder_threshold INT NOT NULL,
-                                           vacant_shares INT NOT NULL,
-                                           total_shares INT NOT NULL,
-                                           money INT NOT NULL,
-                                           share_price INT NOT NULL
-                );""").execute();
+//        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+//                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+//                "hmtdjque",
+//                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        database = new Database();
+        try {
+            database.connection.prepareStatement("DROP table users; DROP " +
+                    "table companies;").execute();
+        } catch (SQLException e) {
+        }
+        try {
+            database.connection.prepareStatement("create extension hstore;").execute();
+        } catch (SQLException e) {
+        }
+        database.connection.prepareStatement("CREATE TABLE users (\n" +
+                "                       id SERIAL PRIMARY KEY,\n" +
+                "                       name VARCHAR(255),\n" +
+                "                       money INT,\n" +
+                "                       shares hstore\n" +
+                ");CREATE TABLE companies (\n" +
+                "                           id SERIAL PRIMARY KEY,\n" +
+                "                           users INT[],\n" +
+                "                           name VARCHAR(255) NOT NULL,\n" +
+                "                           key_shareholder_threshold INT NOT NULL,\n" +
+                "                           vacant_shares INT NOT NULL,\n" +
+                "                           total_shares INT NOT NULL,\n" +
+                "                           money INT NOT NULL,\n" +
+                "                           share_price INT NOT NULL\n" +
+                ");").execute();
     }
 
     @AfterAll
