@@ -471,8 +471,8 @@ public class Database {
         // Вспомогательный метод для обновления связей компании с пользователями
         private void updateUsersForCompany(long companyId, Set<User> users) {
             // SQL-запрос для удаления текущих связей компании с пользователями
-            String deleteUsersForCompanyQuery = "DELETE users FROM companies " +
-                    "WHERE id = ?";
+            String deleteUsersForCompanyQuery = "UPDATE companies SET " +
+                    "users = null WHERE id = ?";
 
             try {
                 PreparedStatement preparedStatement =

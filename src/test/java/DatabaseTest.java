@@ -22,13 +22,21 @@ public class DatabaseTest {
     public static void setUp() throws SQLException {
         // Initialize the database connection before running the tests
 
-        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
-                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
-                "hmtdjque",
-                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
-        // database = new Database();
-        database.connection.prepareStatement("DROP table users;DROP table " +
-                "companies;CREATE TABLE users (\n" +
+//        database = new Database(DriverManager.getConnection("jdbc:postgresql" +
+//                        "://cornelius.db.elephantsql.com:5432/hmtdjque",
+//                "hmtdjque",
+//                "mW9O7Imtz3eqjtvVolLGZ4gWlC9VuKMh"));
+        database = new Database();
+        try {
+            database.connection.prepareStatement("DROP table users; DROP " +
+                    "table companies;").execute();
+        } catch (SQLException e) {
+        }
+        try {
+            database.connection.prepareStatement("create extension hstore;").execute();
+        } catch (SQLException e) {
+        }
+        database.connection.prepareStatement("CREATE TABLE users (\n" +
                 "                       id SERIAL PRIMARY KEY,\n" +
                 "                       name VARCHAR(255),\n" +
                 "                       money INT,\n" +
@@ -234,6 +242,30 @@ public class DatabaseTest {
         assertNotNull(updatedCompany);
         assertEquals("UpdatedCompany", updatedCompany.getCompanyName());
         assertEquals(200, updatedCompany.getTotalShares());
+    }
+
+    @Test
+    public void testInMemoryCompanyRemoveUserFromCompany() {
+        // Create a company and add it to the database
+        Company testCompany = new Company(3, "TestCompany3", 300, 150, 0.8F,
+                2000, 20, new HashSet<>());
+        database.company.create(testCompany);
+
+        // Create user and add to the company
+        User user1 = new User(101, "User101", 100.0, new HashMap<>());
+
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+
+        database.user.create(user1);
+        database.company.addUsersToCompany(3, users);
+
+        // remove user from company
+        Company company = database.company.getById(3);
+        company.withoutUser(user1);
+        database.company.update(company);
+
+        assertEquals(0, database.company.getById(3).getCopyOfUsers().size());
     }
 
     @Test
