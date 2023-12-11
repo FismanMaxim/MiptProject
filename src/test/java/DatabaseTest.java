@@ -237,6 +237,30 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testInMemoryCompanyRemoveUserFromCompany() {
+        // Create a company and add it to the database
+        Company testCompany = new Company(3, "TestCompany3", 300, 150, 0.8F,
+                2000, 20, new HashSet<>());
+        database.company.create(testCompany);
+
+        // Create user and add to the company
+        User user1 = new User(101, "User101", 100.0, new HashMap<>());
+
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+
+        database.user.create(user1);
+        database.company.addUsersToCompany(3, users);
+
+        // remove user from company
+        Company company = database.company.getById(3);
+        company.withoutUser(user1);
+        database.company.update(company);
+
+        assertEquals(0, database.company.getById(3).getCopyOfUsers().size());
+    }
+
+    @Test
     public void testInMemoryCompanyDelete() {
         // Create a company and add it to the database
         Company testCompany = new Company(1, "TestCompany", 100, 50, 0.5F, 1000, 10, new HashSet<>());
