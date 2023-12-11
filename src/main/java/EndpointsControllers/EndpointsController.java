@@ -1,4 +1,4 @@
-package EntitiesControllers;
+package EndpointsControllers;
 
 import Responses.ErrorResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import spark.Response;
 import spark.Service;
 
-public abstract class EntityController {
+public abstract class EndpointsController {
     protected final Service service;
     protected final ObjectMapper objectMapper;
 
-    public EntityController(Service service, ObjectMapper objectMapper) {
+    public EndpointsController(Service service, ObjectMapper objectMapper) {
         this.service = service;
         this.objectMapper = objectMapper;
     }

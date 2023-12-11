@@ -1,6 +1,7 @@
-package EntitiesControllers;
+package EndpointsControllers;
 
 import DTOs.UserDTO;
+import EndpointsControllers.EntitiesControllers.UserController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import InMemoryRepos.InMemoryCompanyRepository;
@@ -89,6 +90,63 @@ class UserControllerTest {
     }
 
     @Test
+    void addMoneyTest() throws IOException, InterruptedException {
+        // Create user
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"name": "testUsername", "password": "pass" }"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(201, response.statusCode());
+
+        EntityIdResponse idResponse = mapper.readValue(response.body(), EntityIdResponse.class);
+        long userId = idResponse.id();
+
+        // Update user's money
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"deltaMoney": 1000 }"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + userId))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
+
+        // Get user
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .GET()
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + userId))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        FindUserResponse findUserResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        UserDTO receivedUser = findUserResponse.user();
+
+        assertEquals("testUsername", receivedUser.name());
+        assertEquals("pass", receivedUser.password());
+        assertEquals(1000, receivedUser.money());
+    }
+
+    @Test
     void errorOnCreateUser() {
         Supplier<HttpResponse<String>> createUser = () -> {
             try {
@@ -170,10 +228,23 @@ class UserControllerTest {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
 
-
-        FindUserResponse userResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        EntityIdResponse idResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(200, response.statusCode());
+        assertEquals(idResponse.id(), 0);
+
+        // Get by retrieved id
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .GET()
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + idResponse.id()))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        FindUserResponse userResponse = mapper.readValue(response.body(), FindUserResponse.class);
+        assertEquals(response.statusCode(), 200);
         assertEquals(userResponse.user().name(), "testUsername");
     }
 }
