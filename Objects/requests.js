@@ -1,28 +1,70 @@
 let activeUser = new User();
 let activeCompany = new Company();
-let companyList = new Map();
-company1 = new Company(0, "МТС", 500, 101, 76, 3500, 76, []);
-company2 = new Company(1, "Яндекс", 500, 116, 230, 3500, 230, []);
-company3 = new Company(2, "Сбер", 500, 24, 3, 3500, 3, []);
-company4 = new Company(3, "1С", 500, 55, 25, 3500, 25, []);
-company5 = new Company(4, "Физтех", 500, 90, 777, 3500, 777, []);
-companyList.set("МТС", company1);
-companyList.set("Яндекс", company2);
-companyList.set("Сбер", company3);
-companyList.set("1С", company4);
-companyList.set("Физтех", company5);
+let activeId = -1;
 
-const url = 'file:///Users/dmitry/Desktop/ProjectUI/MainPage/index.html';
+let isActiveCompany = false;
+
+let companyList = new Map();
+const url = 'http://localhost:4567/api';
+
+function getAccountById() {
+	if (isActiveCompany.flag) {
+		
+		fetch(url + '/company/' + activeId.id + '', {
+			method: 'GET', 
+			headers: {
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
+			},
+		})
+			.then(response => response.json())
+			.then(data => setCompany(data))
+			.catch(error => console.error(error));
+	} else {
+		
+		fetch(url + '/usr/' + activeId.id + '', {
+			method: 'GET', 
+			headers: {
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
+			},
+		})
+			.then(response => response.json())
+			.then(data => setUser(data))
+			.catch(error => console.error(error));
+	}
+}
+
+
+
+function setUser(user) {
+	activeUser = user.user;
+	if (activeUser != undefined) {
+		activateAccount();
+		closeForm();
+		fillCompanyTable();
+	}
+}
+
+function setCompany(company) {
+	console.log(company);
+	activeCompany = company.company;
+	if (activeCompany != undefined) {
+		activateAccount();
+		closeForm();
+		fillCompanyTable();
+	}
+}
 
 function authorization() {
-	let inputLogin = document.querySelector(".lInputName").value;
-	let inputPassword = document.querySelector(".lInputPass").value;
-	let isCompany = document.querySelector(".lToggle").value;
+	let inputLogin;
+	let inputPassword;
+	let isCompany;
 	
 	try {
 		inputLogin = document.querySelector(".lInputName").value;
 		inputPassword = document.querySelector(".lInputPass").value;
-		isCompany = document.querySelector(".lToggle").value;
+		isCompany = document.querySelector(".lToggle").checked;
 	} catch(error) {
 		console.error(error);
 		return;
@@ -30,42 +72,54 @@ function authorization() {
 	
 	if (isCompany) {
 		const data = new URLSearchParams();
-		data.append('companyName', inputLogin);
-		data.append('companyPass', inputPassword);
+		data.append('name', inputLogin);
+		data.append('password', inputPassword);
 		
-		if (!chechData(data)){
+		if (!checkData(data)){
 			selectInput()
 			return;
 		}
 		
-		fetch(url + '/companies?' + data, {
-			method: 'GET', 
+		const body = JSON.stringify({'name': inputLogin, 'password': inputPassword});
+		
+		fetch(url + '/company/auth', {
+			method: 'POST', 
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
-			}
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: body,
 		})
 			.then(response => response.json())
-			.then(data => aciveCompany = data)
+			.then(data => setId(data))
+			.then(setIsCompany(true))
 			.catch(error => console.error(error));
 			
 	} else {
 		const data = new URLSearchParams();
-		data.append('userName', inputLogin);
-		data.append('userPass', inputPassword);
+		data.append('name', inputLogin);
+		data.append('password', inputPassword);
 		
-		if (!chechData(data)){
+		if (!checkData(data)){
 			selectInput()
 			return;
 		}
 		
-		fetch(url + '/users?' + data, {
-			method: 'GET', 
+		const body = JSON.stringify({'name': inputLogin, 'password': inputPassword});
+		
+		console.log(body);
+		
+		fetch(url + '/usr/auth', {
+			method: 'POST', 
 			headers: {
-				'Content-Type': 'application/json;charset=utf-8'
-			}
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: body,
 		})
 			.then(response => response.json())
-			.then(data => activeUser = data)
+			.then(data => setId(data))
+			.then(setIsCompany(false))
 			.catch(error => console.error(error));
 	}
 }
@@ -78,7 +132,7 @@ function registration() {
 	try {
 		inputLogin = document.querySelector(".rInputName").value;
 		inputPassword = document.querySelector(".rInputPass").value;
-		isCompany = document.querySelector(".rToggle").value;
+		isCompany = document.querySelector(".rToggle").checked;
 	} catch(error) {
 		console.error(error);
 		return;
@@ -86,122 +140,510 @@ function registration() {
 	
 	if (isCompany) {
 		const data = new URLSearchParams();
-		data.append('companyName', inputLogin);
-		data.append('companyPass', inputPassword);
+		data.append('name', inputLogin);
+		data.append('password', inputPassword);
 		
-		if (!chechData(data)){
+		if (!checkData(data)){
 			selectInput()
 			return;
 		}
 		
-		fetch(url + '/companies', {
-			method: 'PUT', 
+		const body = JSON.stringify({'name': inputLogin, 'password':inputPassword});
+		
+		fetch(url + '/company', {
+			method: 'POST', 
 			headers: {
-				'Content-Type': 'application/json;charset=utf-8'
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
 			},
-			body: data
+			body: body,
 		})
 			.then(response => response.json())
-			.then(data => aciveCompany = data)
+			.then(data => setId(data))
+			.then(setIsCompany(true))
 			.catch(error => console.error(error));
+		
 	} else {
 		const data = new URLSearchParams();
-		data.append('userName', inputLogin);
-		data.append('userPass', inputPassword);
+		data.append("name", inputLogin);
+		data.append("password", inputPassword);
 		
-		if (!chechData(data)){
+		if (!checkData(data)){
 			selectInput()
 			return;
 		}
 		
-		fetch(url + '/users', {
-			method: 'PUT', 
+		const body = JSON.stringify({'name': inputLogin, 'password':inputPassword});
+
+		fetch(url + '/usr', {
+			method: 'POST', 
 			headers: {
-				'Content-Type': 'application/json;charset=utf-8'
+				'Accept' : 'application/json',
+				'Content-Type': 'application/json'
 			},
-			body: data
+			body: body,
 		})
-			.then(response => activeUser.json())
-			.then(data => aciveCompany = data)
+			.then(response => response.json())
+			.then(data => setId(data))
+			.then(setIsCompany(false))
 			.catch(error => console.error(error));
 	}
 }
 
-function getCompanies() {
-	fetch(url + '/companies', {
-		method: 'GET', 
+function setIsCompany(isCompany) {
+	isActiveCompany = Object.freeze({
+		flagValue : isCompany,
+		get flag() {
+			return this.flagValue;
+		},
+	});
+}
+
+function setId(id) {
+	activeId = Object.freeze({
+		idValue : id.id,
+		get id() {
+			return this.idValue;
+		},
+	});
+	
+	getAccountById();
+}
+
+function getCompanies() {	
+	fetch(url + "/company", {
+		method: 'GET',
 		headers: {
-			'Content-Type': 'application/json;charset=utf-8'
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
 		}
 	})
-		.then(response => activeUser.json())
-		.then(data => companyList = data)
+		.then(response => response.json())
+		.then(data => setCompanyList(data))
 		.catch(error => console.error(error));
 }
 
-function buyShares() {
+function setCompanyList(list) {
+	list = list.companiesResponses;
+	
+	
+	companyList = new Map();
+	for (let i = 0; i < list.length; i++){
+		companyList.set(list[i].company.id, list[i].company);
+	};
+	
+	console.log(companyList);
+	fillCompanyTable();
+}
+
+async function buyShares() {
 	let delta = 0;
 	let companyId;
+	let userId;
 	
 	try {
-		delta = document.querySelector(".lInputSharesDelta").value;
-		companyId = companyList.get(chosenCompany.companyName).id;
+		delta = parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = chosenCompany.companyId;
+		userId = activeId.id;
 	} catch(error) {
 		console.error(error);
 		return;
 	}
 	
 	const data = new URLSearchParams();
+	data.append('sharesDelta', delta);
 	data.append('companyId', companyId);
-	data.append('delta', delta);
 	
-	if (!chechData(data)){
+	console.log(data)
+	
+	if (!checkData(data)){
 		selectInput()
 		return;
 	}
-		
-	let userId = activeUser.id;
-	fetch(url+"/users/" + userId +"/shares", {
-		method:"POST", 
+	
+	const body = JSON.stringify({'sharesDelta': [{'companyId':companyId, 'countDelta':delta}]});
+	console.log(body);
+	
+	await fetch(url+"/usr/" + userId +"/shares", {
+		method:"PUT", 
 		headers: {
-			'Content-Type': 'application/json;charset=utf-8'
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
 		},
-		body: data
+		body: body
 	})
+		.then(createTransactionLog(delta, "Buy " + delta + " shares of " + chosenCompany.companyName, "Buy " + chosenCompany.companyName + " shares transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	updateShares();
+	
+	removeTransactionConfirmForm();
 }
 
-function selShares() {
+async function selShares() {
+	let delta;
+	let companyId;
+	let userId;
+	
+	try {
+		delta = -parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = chosenCompany.companyId;
+		userId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('sharesDelta', delta);
+	data.append('companyId', companyId);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'sharesDelta': [{'companyId':companyId, 'countDelta':delta}]});
+	
+	await fetch(url+"/users/" + userId +"/shares", {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(delta, "Sel " + delta + " shares of " + chosenCompany.companyName, "Sel " + chosenCompany.companyName + " shares transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	updateShares();
+	
+	removeTransactionConfirmForm();
+}
+
+async function refillBalanceUser() {
+	let delta;
+	let userId;
+	
+	try {
+		delta = parseInt(document.querySelector(".lInputSharesDelta").value);
+		userId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('deltaMoney', delta);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'deltaMoney': delta});
+	console.log(body + "  **");
+	
+	await fetch(url+"/usr/" + userId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+
+	removeTransactionConfirmForm();
+}
+
+async function changeUserName() {
+	let newName;
+	let userId;
+	
+	try {
+		newName = document.querySelector(".rInputSharesDelta").value;
+		userId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('name', newName);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'name': newName});
+	
+	await fetch(url+"/usr/" + userId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(newName, "Name have been changed on " + newName, "Name change transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	
+	removeTransactionConfirmForm();
+}
+
+async function refillBalanceCompany() {
 	let delta;
 	let companyId;
 	
 	try {
-		delta = -document.querySelector(".lInputSharesDelta").value;
-		companyId = companyList.get(chosenCompany.companyName).id;
+		delta = parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = activeId.id;
 	} catch(error) {
 		console.error(error);
 		return;
 	}
 	
 	const data = new URLSearchParams();
-	data.append('companyId', companyId);
-	data.append('delta', delta);
+	data.append('deltaMoney', delta);
 	
-	if (!chechData(data)){
+	if (!checkData(data)){
 		selectInput()
 		return;
 	}
 	
-	let userId = activeUser.id;
-	fetch(url+"/users/" + userId +"/shares", {
-		method:"POST", 
+	const body = JSON.stringify({'deltaMoney': delta});
+	
+	await fetch(url+"/company/" + companyId, {
+		method:"PUT", 
 		headers: {
-			'Content-Type': 'application/json;charset=utf-8'
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
 		},
-		body: data
+		body: body
 	})
+		.then(createTransactionLog(delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	
+	removeTransactionConfirmForm();
 }
 
-function chechData(data) {
+async function changeCompanyName() {
+	let newName;
+	let companyId;
+	
+	try {
+		newName = document.querySelector(".rInputSharesDelta").value;
+		companyId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('name', newName);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'name': newName});
+	
+	await fetch(url+"/company/" + companyId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(newName, "Name have been changed on " + newName, "Name change transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	
+	removeTransactionConfirmForm();
+}
+
+async function changeDeltaShares() {
+	let delta;
+	let companyId;
+	
+	try {
+		delta = parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('deltaShares', delta);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'deltaShares': delta});
+	
+	await fetch(url+"/company/" + companyId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(delta, "Change amount of shares on " + delta, "Change amount of shares transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	
+	removeTransactionConfirmForm();
+}
+
+async function changeSharesCost() {
+	let price;
+	let companyId;
+	
+	try {
+		price = parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('sharePrice', price);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'sharePrice': price});
+	
+	await fetch(url+"/company/" + companyId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(price, "Change cost of shares on " + price, "Change cost of shares transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+
+	removeTransactionConfirmForm();
+}
+
+async function changeThreshold() {
+	let threshold;
+	let companyId;
+	
+	try {
+		threshold = parseInt(document.querySelector(".lInputSharesDelta").value);
+		companyId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	const data = new URLSearchParams();
+	data.append('threshold', threshold);
+	
+	if (!checkData(data)){
+		selectInput()
+		return;
+	}
+	
+	const body = JSON.stringify({'threshold': threshold});
+	
+	await fetch(url+"/company/" + companyId, {
+		method:"PUT", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: body
+	})
+		.then(createTransactionLog(threshold, "Change threshold on " + threshold, "Change threshold transaction failed"))
+		.catch(error => createTransactionLog(error));
+		
+	getAccountById();
+	
+	removeTransactionConfirmForm();
+}
+
+function deleteUser() {
+	let userId;
+	
+	try {
+		userId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	fetch(url+"/usr/" + userId, {
+		method:"DELETE", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		}
+	});
+	
+	window.location.reload();
+}
+
+function deleteCompany() {
+	let companyId;
+	
+	try {
+		companyId = activeId.id;
+	} catch(error) {
+		console.error(error);
+		return;
+	}
+	
+	fetch(url+"/company/" + companyId, {
+		method:"DELETE", 
+		headers: {
+			'Accept' : 'application/json',
+			'Content-Type': 'application/json'
+		}
+	});
+	
+	window.location.reload();
+}
+
+function createTransactionLog(value, text, textError) {
+	let el = document.createElement("div");
+	el.className = "transactionLogBlock flexable";
+	if (value == null || value == undefined || Number.isNaN(value)) {
+		el.innerHTML = "<span class='errorLog'>" + textError + "</span>";
+	} else {
+		el.innerHTML = "<span class='correctLog'>" + text + "</span>";
+	}
+	document.querySelector(".transactionsLogHistory").appendChild(el);
+}
+
+function checkData(data) {
 	let flag = true;
 	data.forEach((value, key) => {
 		if (!value) {
@@ -209,12 +651,4 @@ function chechData(data) {
 		}
 	});
 	return flag;
-}
-function selectInput() {
-	document.documentElement.style.setProperty('--input-color', '#FF0000');
-	setTimeout(removeInputSelections, 1000);
-}
-
-function removeInputSelections() {
-	document.documentElement.style.setProperty('--input-color', '#8e8e8e');
 }

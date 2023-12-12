@@ -21,7 +21,8 @@ const User = class {
 }
 
 const ChosenCompany = class {
-	constructor(companyName) {
+	constructor(companyId, companyName) {
+		this.companyId = companyId;
 		this.companyName = companyName;
 	}
 }
