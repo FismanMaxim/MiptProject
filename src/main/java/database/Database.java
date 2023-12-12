@@ -2,14 +2,13 @@ package database;
 
 import Entities.Company;
 import Entities.User;
+import EntitiesRepositories.EntityRepository;
+import org.postgresql.core.Encoding;
+import org.postgresql.util.HStoreConverter;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-
-import EntitiesRepositories.EntityRepository;
-import org.postgresql.core.Encoding;
-import org.postgresql.util.HStoreConverter;
 
 public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
@@ -32,7 +31,7 @@ public class Database {
     static private String Hstoryfy(Map<Long, Integer> map) {
         StringBuilder stringBuilder = new StringBuilder();
         for (var i : map.entrySet()) {
-            stringBuilder.append(String.format("'\"%s\"=>\"%s\"',",
+            stringBuilder.append(String.format("'\"%s\"=>\"%s\",'",
                     i.getKey().toString()
                     , i.getValue().toString()));
         }
