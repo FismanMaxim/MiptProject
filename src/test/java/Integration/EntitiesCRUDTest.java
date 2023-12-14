@@ -214,6 +214,24 @@ public class EntitiesCRUDTest {
 
         assertEquals(200, response.statusCode());
 
+        // User sells some shares
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"sharesDelta":[{"companyId":%d,"countDelta":-10}]}""".formatted(companyId)
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+
+        assertEquals(200, response.statusCode());
+
         // Read company
         response = HttpClient.newHttpClient()
                 .send(
@@ -229,9 +247,9 @@ public class EntitiesCRUDTest {
         assertEquals(200, response.statusCode());
         assertEquals("newCompanyName", findCompanyResponse.company().getCompanyName());
         assertEquals(100, findCompanyResponse.company().getTotalShares());
-        assertEquals(50, findCompanyResponse.company().getVacantShares());
+        assertEquals(60, findCompanyResponse.company().getVacantShares());
         assertEquals(25, findCompanyResponse.company().getKeyShareholderThreshold());
-        assertEquals(1000, findCompanyResponse.company().getMoney());
+        assertEquals(5000, findCompanyResponse.company().getMoney());
         assertEquals(100, findCompanyResponse.company().getSharePrice());
         assertEquals(1, findCompanyResponse.company().getCopyOfUsers().size());
 
@@ -251,8 +269,8 @@ public class EntitiesCRUDTest {
         UserDTO receivedUser = findUserResponse.user();
 
         assertEquals("newUserName", receivedUser.name());
-        assertEquals(0, receivedUser.money());
-        assertEquals(Map.of(companyId, 50), receivedUser.shares());
+        assertEquals(1000, receivedUser.money());
+        assertEquals(Map.of(companyId, 40), receivedUser.shares());
 
         // Delete user
         response = HttpClient.newHttpClient()

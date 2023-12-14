@@ -213,7 +213,6 @@ public class UserController extends EntityController<UserService> {
                         400);
             }
 
-
             AddUserSharesRequest addUserSharesRequest;
             try {
                 addUserSharesRequest = objectMapper.readValue(request.body(), AddUserSharesRequest.class);
@@ -237,6 +236,14 @@ public class UserController extends EntityController<UserService> {
                 if (countShares > 0 && company.getVacantShares() < countShares) {
                     return InformOfClientError(LOGGER,
                             "User cannot buy more shares than a company has",
+                            response,
+                            new NegativeSharesException(),
+                            400);
+                }
+                // If user is selling shares, the company must have enough money to pay the user
+                if (countShares < 0 && company.getMoney() < countShares * company.getSharePrice()) {
+                    return InformOfClientError(LOGGER,
+                            "User cannot sell shares because company does not have enough money to pay",
                             response,
                             new NegativeSharesException(),
                             400);
@@ -266,6 +273,7 @@ public class UserController extends EntityController<UserService> {
                 int countShares = addUserSharesRequest.sharesDelta().get(i).countDelta();
 
                 company = company.withVacantSharesDelta(-countShares);
+                company = company.withDeltaMoney(countShares * company.getSharePrice());
                 if (countShares > 0 && !company.hasUser(user)) {
                     company = company.withNewUser(user);
                 } else if (countShares + user.countSharesOfCompany(company.getId()) == 0) {
