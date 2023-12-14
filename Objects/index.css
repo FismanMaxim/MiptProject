@@ -182,7 +182,7 @@ main {
 }
 .reviewButton {
 	transition: 0.5s;
-	width: 200px;
+	width: 160px;
 	height: 40px;
 	background: var(--main-color);
 	color: white;
@@ -206,12 +206,48 @@ main {
 .tableReloadButton:hover {
 	transform: rotate(120deg);
 }
+.tableFilterContainer {
+	height: 50px;
+	width: 72%;
+	max-width: 480px;
+	background: black;
+	margin-bottom: 20px;
+}
+.tableFilterInputBlock {
+	width: 100%;
+	height: 100%;
+}
+.filterBlock {
+	min-height: 45px;
+	min-width: 45px;
+	border-bottom: 5px solid black;
+}
+.sortFilter {
+	border-left: 5px solid black;
+}
+.obtainFilter {
+	border-right: 5px solid black;
+}
+.filterBlockIcon {
+	transition: 0.3s;
+	height: 35px;
+	width: 35px;
+}
+.filterBlockIcon:hover {
+	height: 40px;
+	width: 40px;
+}
+.sortFilterIcon {
+	background: url('Images/letter.png') no-repeat center center / cover;
+}
+.obtainFilterIcon {
+	background: url('Images/envelope.png') no-repeat center center / cover;
+}
 .mainReviewTableContainer {
 	min-width: 800px;
 	min-height: calc(100vh - 280px);
 	background: black;
 	align-items: flex-start;
-	margin-bottom: 70px;
 }
 .mainReviewTable {
 	width: 780px;

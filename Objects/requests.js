@@ -42,6 +42,7 @@ function setUser(user) {
 	if (activeUser != undefined) {
 		activateAccount();
 		closeForm();
+		sortedCompanyList = companyList;
 		fillCompanyTable();
 	}
 }
@@ -52,6 +53,7 @@ function setCompany(company) {
 	if (activeCompany != undefined) {
 		activateAccount();
 		closeForm();
+		sortedCompanyList = companyList;
 		fillCompanyTable();
 	}
 }
@@ -226,14 +228,13 @@ function getCompanies() {
 function setCompanyList(list) {
 	list = list.companiesResponses;
 	
-	
 	companyList = new Map();
 	for (let i = 0; i < list.length; i++){
+		list[i].company.companyName = list[i].company.companyName.toUpperCase();
 		companyList.set(list[i].company.id, list[i].company);
 	};
 	
-	console.log(companyList);
-	fillCompanyTable();
+	getSortedCompanyList();
 }
 
 async function buyShares() {
@@ -306,7 +307,7 @@ async function selShares() {
 	
 	const body = JSON.stringify({'sharesDelta': [{'companyId':companyId, 'countDelta':delta}]});
 	
-	await fetch(url+"/users/" + userId +"/shares", {
+	await fetch(url+"/usr/" + userId +"/shares", {
 		method:"PUT", 
 		headers: {
 			'Accept' : 'application/json',
@@ -314,7 +315,7 @@ async function selShares() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Sel " + delta + " shares of " + chosenCompany.companyName, "Sel " + chosenCompany.companyName + " shares transaction failed"))
+		.then(createTransactionLog(delta, "Sel " + (-delta) + " shares of " + chosenCompany.companyName, "Sel " + chosenCompany.companyName + " shares transaction failed"))
 		.catch(error => createTransactionLog(error));
 		
 	getAccountById();

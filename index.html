@@ -164,7 +164,7 @@
 					<div class="reviewButton clickable newsButton flexable" onclick="chooseReviewTab('news')"><span>News</span></div>
 					<div class="reviewButton clickable transactionsButton flexable" onclick="chooseReviewTab('transactions')"><span>Transactions</span></div>
 					
-					<div class="tableReloadButton" onclick="fillCompanyTable()"></div>
+					<div class="tableReloadButton" onclick="getSortedCompanyList()"></div>
 				</div>
 				<div class="mainReviewTableContainer flexable">
 					<div class="mainReviewTable">
@@ -183,6 +183,17 @@
 							<div class="transactionsLogArticleContainer"><div class="transactionsLogArticle flexable"><span>Your transactions history</span></div></div>
 							<div class="transactionsLogHistory flexable"></div>
 						</div>
+					</div>
+				</div>
+				<div class="tableFilterContainer flexable">
+					<div class="filterBlock sortFilter flexable" onclick="setSortingFilter()">
+						<div class="filterBlockIcon sortFilterIcon"></div>
+					</div>
+					<div class="tableFilterInputBlock">
+						<input class="input lInputSharesDelta tableFilterInput" type="text" placeholder="May be you want...">
+					</div>
+					<div class="filterBlock obtainFilter flexable" onclick="setObtainingFilter()">
+						<div class="filterBlockIcon obtainFilterIcon"></div>
 					</div>
 				</div>
 			</div>

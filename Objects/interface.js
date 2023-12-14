@@ -60,7 +60,6 @@ function editShares(id, name, cost) {
 }
 function updateShares() {
 	let id = chosenCompany.companyId;
-	console.log(activeUser.shares[id]);
 	if (activeUser.shares[id] > 0) {
 		document.querySelector(".transactionUserValue").innerHTML = "You have " + activeUser.shares[id] + " shares";
 	} else {
@@ -123,12 +122,14 @@ function prepairPage() {
 	getCompanies();
 }
 
+let sortedCompanyList;
+
 function fillCompanyTable() {
 	let table = document.querySelector(".sharesBlock");
-	table.innerHTML = "<tr><th>Shareholder</th><th>Share price</th><th>TotalShares</th></tr>";
+	table.innerHTML = "<tr><th>Shareholder</th><th>Share price</th><th>VacantShares</th></tr>";
 	
 	try {
-		companyList.forEach((company, key) => {
+		sortedCompanyList.forEach((company) => {
 			let companyBlock = document.createElement("tr");
 			let html = [];
 			html.push(
@@ -151,7 +152,7 @@ function fillCompanyTable() {
 				);
 			} else {
 				html.push(
-					company.totalShares
+					company.vacantShares
 				);
 			}
 			companyBlock.innerHTML = html.join("");
@@ -321,4 +322,69 @@ function isVip(user, companyId) {
 	} else {
 		return "&#10008;";
 	}
+}
+
+let isSortCommon = 0;
+function setSortingFilter() {
+	isSortCommon = (isSortCommon + 1) % 3;
+	if (isSortCommon == 0) {
+		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/letter.png') no-repeat center center / cover";
+	} else if (isSortCommon == 1) {
+		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/graphDown.png') no-repeat center center / cover";
+	} else {
+		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/graphUp.png') no-repeat center center / cover";
+	}
+	getSortedCompanyList();
+}
+let isObtain = 1;
+function setObtainingFilter() {
+	if (activeId.id >= 0){
+		isObtain = (isObtain + 1) % 3;
+		if (isObtain == 1) {
+			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelope.png') no-repeat center center / cover";
+		} else if (isObtain == 2) {
+			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelopeT.png') no-repeat center center / cover";
+		} else {
+			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelopeF.png') no-repeat center center / cover";
+		}
+		getSortedCompanyList();
+	}
+}
+let filter = "";
+document.querySelector(".tableFilterInput").addEventListener("input", () => {
+	filter = document.querySelector(".tableFilterInput").value.toUpperCase();
+	getSortedCompanyList();
+});
+
+function getSortedCompanyList() {
+	sortedCompanyList = [];
+	
+	companyList.forEach((company, key) => {
+		let fl1 = true;
+		let fl2 = true;
+		
+		if ((filter != "" && !(company.companyName.includes(filter)))) {
+			fl1 = false;
+		}
+		
+		if (isObtain != 1 && activeId.id >= 0 && ((isObtain > 0) ^ (activeUser.shares[parseInt(company.id)] > 0))){
+			fl2 = false;
+		}
+		
+		if (fl1 && fl2) {
+			sortedCompanyList.push(company);
+		}
+	});
+	
+	
+	
+	if (isSortCommon == 0) {
+		sortedCompanyList = sortedCompanyList.sort((a, b) => a.companyName > b.companyName);
+	} else if (isSortCommon == 1) {
+		sortedCompanyList = sortedCompanyList.sort((a, b) => b.sharePrice > a.sharePrice);
+	} else {
+		sortedCompanyList = sortedCompanyList.sort((a, b) => a.sharePrice > b.sharePrice);
+	}
+	console.log(sortedCompanyList);
+	fillCompanyTable();
 }
