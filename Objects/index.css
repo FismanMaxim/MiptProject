@@ -10,7 +10,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	background: var(--main-color);
-	font-family: Neon;
+	font-family: Tahoma;
 }
 * {
 	padding: 0;
@@ -537,7 +537,7 @@ main {
 	margin: 0px 10px;
 }
 input {
-	font-family: Neon;
+	font-family: Tahoma;
 }
 .submitButtonContainer {
 	position: absolute;

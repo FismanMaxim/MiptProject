@@ -48,7 +48,7 @@ function editShares(id, name, cost) {
 	if (activeId.id >= 0 && isActiveCompany.flag == false) {
 		chosenCompany = new ChosenCompany(id, name);
 		
-		document.querySelector(".companyName").innerHTML = "Shareholder: " + name;
+		document.querySelector(".companyName").innerHTML = "Issuer: " + name;
 		document.querySelector(".companyCost").innerHTML = "The share price is " + cost;
 		document.querySelector(".transactionBlock").style.display = "flex";
 		if (activeUser.shares[id] > 0) {
@@ -126,7 +126,7 @@ let sortedCompanyList;
 
 function fillCompanyTable() {
 	let table = document.querySelector(".sharesBlock");
-	table.innerHTML = "<tr><th>Shareholder</th><th>Share price</th><th>VacantShares</th></tr>";
+	table.innerHTML = "<tr><th>Issuer</th><th>Share price</th><th>Available shares</th></tr>";
 	
 	try {
 		sortedCompanyList.forEach((company) => {
@@ -271,7 +271,7 @@ async function getCompanyInfo() {
 		activeCompany.totalShares,
 		"</span></div>",
 		
-		"<div class='personalDataRaw personalDataLevel1 flexable'><span>Vacant shares: </span></div>",
+		"<div class='personalDataRaw personalDataLevel1 flexable'><span>Available shares: </span></div>",
 		"<div class='personalDataRaw personalDataLevel2 flexable'><span>",
 		activeCompany.vacantShares,
 		"</span></div>",
