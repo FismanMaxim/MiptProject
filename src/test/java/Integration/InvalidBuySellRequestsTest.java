@@ -1,6 +1,5 @@
 package Integration;
 
-import DTOs.UserDTO;
 import EndpointsControllers.ControllersManager;
 import EndpointsControllers.EntitiesControllers.CompanyController;
 import EndpointsControllers.EntitiesControllers.UserController;
@@ -10,13 +9,12 @@ import EntitiesRepositories.EntityRepository;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import Responses.EntityIdResponse;
-import Responses.FindCompanyResponse;
-import Responses.FindUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import database.Database;
 import org.junit.jupiter.api.*;
 import spark.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -25,16 +23,17 @@ import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class EntitiesCRUDTest {
+public class InvalidBuySellRequestsTest {
     private Service service;
     private static ObjectMapper mapper;
-
     private static Database database;
 
+    private long companyId, userId;
+
+    // region Before/After all/each
     @BeforeAll
     public static void setUpDb() throws SQLException {
         // Initialize the database connection before running the tests
@@ -70,26 +69,53 @@ public class EntitiesCRUDTest {
                 ");").execute();
     }
 
-    @AfterAll
-    public static void tearDown() {
-        database.dropConnection();
-    }
-
-    @AfterEach
-    public void clearing() {
-        try {
-            database.connection.prepareStatement("delete from users where id != " +
-                    "-3").execute();
-            database.connection.prepareStatement("delete from companies where id != " +
-                    "-3").execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     @BeforeAll
-    static void initMapper() {
+    static void setUpMapper() {
         mapper = new ObjectMapper();
+    }
+
+    @BeforeEach
+    void createCompanyAndUser() throws Exception {
+        // region Create company
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"name\": \"testName\", \"password\": \"companyPass\"}"
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        EntityIdResponse createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
+
+        assertEquals(201, response.statusCode());
+        companyId = createResponse.id();
+        // endregion
+
+        // region Create user
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"name": "testUsername", "password": "pass" }"""
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
+
+        assertEquals(201, response.statusCode());
+        userId = createResponse.id();
+        // endregion
     }
 
     @BeforeEach
@@ -114,61 +140,46 @@ public class EntitiesCRUDTest {
         service.awaitInitialization();
     }
 
+    @AfterAll
+    public static void tearDown() {
+        database.dropConnection();
+    }
+
+    @AfterEach
+    public void clearing() {
+        try {
+            database.connection.prepareStatement("delete from users where id != " +
+                    "-3").execute();
+            database.connection.prepareStatement("delete from companies where id != " +
+                    "-3").execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @AfterEach
     void stopService() {
         service.stop();
         service.awaitStop();
     }
+    // endregion
 
     @Test
-    void companyControllerCRUD() throws Exception {
-        // Create company
+    void cannotBuyMoreSharesThanCompanyHas() throws Exception {
+        // region local constants
+        final int countSharesPart = 100;
+        final int countUserBuys = countSharesPart + 1;
+        final int sharePrice = 50;
+        // endregion
+
+        // region Update user
         HttpResponse<String> response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .POST(
-                                        HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"testName\", \"password\": \"companyPass\"}"
-                                        )
-                                )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        EntityIdResponse createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
-
-        assertEquals(201, response.statusCode());
-        long companyId = createResponse.id();
-
-        // Create user
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .POST(
-                                        HttpRequest.BodyPublishers.ofString(
-                                                """
-                                                        {"name": "testUsername", "password": "pass" }"""
-                                        )
-                                )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        createResponse = mapper.readValue(response.body(), EntityIdResponse.class);
-
-        assertEquals(201, response.statusCode());
-        long userId = createResponse.id();
-
-        // Update user
-        response = HttpClient.newHttpClient()
                 .send(
                         HttpRequest.newBuilder()
                                 .PUT(
                                         HttpRequest.BodyPublishers.ofString(
                                                 """
-                                                        {"name": "newUserName", "deltaMoney": 5000}"""
+                                                        {"deltaMoney": %d}""".formatted(countSharesPart * sharePrice)
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
@@ -177,15 +188,16 @@ public class EntitiesCRUDTest {
                 );
 
         assertEquals(200, response.statusCode());
+        // endregion
 
-        // Update company
+        // region Update company
         response = HttpClient.newHttpClient()
                 .send(
                         HttpRequest.newBuilder()
                                 .PUT(
                                         HttpRequest.BodyPublishers.ofString(
-                                                "{\"name\": \"newCompanyName\", \"deltaMoney\": 1000, " +
-                                                        "\"deltaShares\": 100, \"sharePrice\": 100, \"threshold\": 25}"
+                                                "{\"deltaShares\": %d, \"sharePrice\": %d, \"threshold\": 25}"
+                                                        .formatted(countSharesPart, sharePrice)
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
@@ -193,8 +205,69 @@ public class EntitiesCRUDTest {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
 
+        assertEquals(200, response.statusCode());
+        // endregion
+
+        // User buys shares in the amount of 200 (must throw exception)
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, countUserBuys)
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void cannotSellMoreSharesThanUserHas() throws IOException, InterruptedException {
+        // region local constants
+        final int buySharesCount = 50;
+        final int sellSharesCount = buySharesCount + 1; // user tries to sell more shares than they have
+        final int sharePrice = 50;
+        // endregion
+
+        // region Update user
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                """
+                                                        {"deltaMoney": %d}""".formatted(buySharesCount * sharePrice)
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
 
         assertEquals(200, response.statusCode());
+        // endregion
+
+        // region Update company
+        response = HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .PUT(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"deltaShares\": %d, \"sharePrice\": %d, \"threshold\": 25}"
+                                                        .formatted(buySharesCount, sharePrice)
+                                        )
+                                )
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+        assertEquals(200, response.statusCode());
+        // endregion
 
         // User buys shares
         response = HttpClient.newHttpClient()
@@ -203,97 +276,29 @@ public class EntitiesCRUDTest {
                                 .PUT(
                                         HttpRequest.BodyPublishers.ofString(
                                                 """
-                                                        {"sharesDelta":[{"companyId":%d,"countDelta":50}]}""".formatted(companyId)
+                                                        {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, buySharesCount)
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
-
-
         assertEquals(200, response.statusCode());
 
-        // User sells some shares
+        // User sells shares
         response = HttpClient.newHttpClient()
                 .send(
                         HttpRequest.newBuilder()
                                 .PUT(
                                         HttpRequest.BodyPublishers.ofString(
                                                 """
-                                                        {"sharesDelta":[{"companyId":%d,"countDelta":-10}]}""".formatted(companyId)
+                                                        {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, -sellSharesCount)
                                         )
                                 )
                                 .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
-
-
-        assertEquals(200, response.statusCode());
-
-        // Read company
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .GET()
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        FindCompanyResponse findCompanyResponse = mapper.readValue(response.body(), FindCompanyResponse.class);
-
-        assertEquals(200, response.statusCode());
-        assertEquals("newCompanyName", findCompanyResponse.company().getCompanyName());
-        assertEquals(100, findCompanyResponse.company().getTotalShares());
-        assertEquals(60, findCompanyResponse.company().getVacantShares());
-        assertEquals(25, findCompanyResponse.company().getKeyShareholderThreshold());
-        assertEquals(5000, findCompanyResponse.company().getMoney());
-        assertEquals(100, findCompanyResponse.company().getSharePrice());
-        assertEquals(1, findCompanyResponse.company().getCopyOfUsers().size());
-
-        // update user one more time (adding shares and checking that vacant shares changes correctly)
-
-        // Read user
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .GET()
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        FindUserResponse findUserResponse = mapper.readValue(response.body(), FindUserResponse.class);
-        UserDTO receivedUser = findUserResponse.user();
-
-        assertEquals("newUserName", receivedUser.name());
-        assertEquals(1000, receivedUser.money());
-        assertEquals(Map.of(companyId, 40), receivedUser.shares());
-
-        // Delete user
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .DELETE()
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        assertEquals(200, response.statusCode());
-
-        // Delete company
-        response = HttpClient.newHttpClient()
-                .send(
-                        HttpRequest.newBuilder()
-                                .DELETE()
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-                );
-
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 }

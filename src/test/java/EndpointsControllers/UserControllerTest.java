@@ -86,7 +86,6 @@ class UserControllerTest {
         UserDTO receivedUser = findUserResponse.user();
 
         assertEquals("testUsername", receivedUser.name());
-        assertEquals("pass", receivedUser.password());
     }
 
     @Test
@@ -142,7 +141,6 @@ class UserControllerTest {
         UserDTO receivedUser = findUserResponse.user();
 
         assertEquals("testUsername", receivedUser.name());
-        assertEquals("pass", receivedUser.password());
         assertEquals(1000, receivedUser.money());
     }
 

@@ -8,6 +8,7 @@ import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
 import Requests.AddUserSharesRequest;
 import Requests.AuthenticationRequest;
+import Requests.CreateEntityRequest;
 import Responses.EntityIdResponse;
 import Responses.FindUserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,32 +44,19 @@ public class UserController extends EntityController<UserService> {
         service.post("/api/usr", (Request request, Response response) -> {
             response.type("application.json");
 
-            JsonNode jsonTree;
+            CreateEntityRequest createRequest;
             try {
-                jsonTree = objectMapper.readTree(request.body());
+                createRequest = objectMapper.readValue(request.body(), CreateEntityRequest.class);
             } catch (JsonProcessingException e) {
                 return InformOfClientError(LOGGER,
-                        "Failed to convert body to json tree: " + request.body(),
+                        "Failed to convert json string: " + request.body(),
                         response,
                         e,
                         400);
             }
 
-            JsonNode userName = jsonTree.get("name");
-            JsonNode password = jsonTree.get("password");
-
-            if (userName == null || password == null) {
-                return InformOfClientError(LOGGER,
-                        "Not found obligatory parameters name and password",
-                        response,
-                        new IllegalArgumentException(),
-                        400);
-            }
-
-            UserDTO userDTO = new UserDTO(userName.textValue(), password.textValue());
-
             try {
-                long createdId = entityService.create(userDTO);
+                long createdId = entityService.create(createRequest);
                 response.status(201);
                 return objectMapper.writeValueAsString(new EntityIdResponse(createdId));
             } catch (CreateEntityException e) {
@@ -225,7 +213,6 @@ public class UserController extends EntityController<UserService> {
                         400);
             }
 
-
             AddUserSharesRequest addUserSharesRequest;
             try {
                 addUserSharesRequest = objectMapper.readValue(request.body(), AddUserSharesRequest.class);
@@ -239,12 +226,54 @@ public class UserController extends EntityController<UserService> {
 
             User user = entityService.getById(id);
 
+            // Check request validity (user has enough money, companies have enough shares)
             long totalPrice = 0;
             for (int i = 0; i < addUserSharesRequest.sharesDelta().size(); i++) {
                 Company company = companyService.getById(addUserSharesRequest.sharesDelta().get(i).companyId());
                 int countShares = addUserSharesRequest.sharesDelta().get(i).countDelta();
 
+                // If user is buying shares, the amount of them cannot be less than vacant shares of company
+                if (countShares > 0 && company.getVacantShares() < countShares) {
+                    return InformOfClientError(LOGGER,
+                            "User cannot buy more shares than a company has",
+                            response,
+                            new NegativeSharesException(),
+                            400);
+                }
+                // If user is selling shares, the company must have enough money to pay the user
+                if (countShares < 0 && company.getMoney() < countShares * company.getSharePrice()) {
+                    return InformOfClientError(LOGGER,
+                            "User cannot sell shares because company does not have enough money to pay",
+                            response,
+                            new NegativeSharesException(),
+                            400);
+                }
+                // If user is selling shares, the amount of them cannot be greater than the amount they have
+                if (countShares < 0 && user.countSharesOfCompany(company.getId()) < -countShares) {
+                    return InformOfClientError(LOGGER,
+                            "User cannot sell more shares than they have",
+                            response,
+                            new NegativeSharesException(),
+                            400);
+                }
+
+                totalPrice += countShares * company.getSharePrice();
+            }
+            if (user.getMoney() < totalPrice) {
+                return InformOfClientError(LOGGER,
+                        "The total price of shares the user wants to buy exceeds the amount of money they have",
+                        response,
+                        new NegativeMoneyException(),
+                        400);
+            }
+
+            // If the validation check was successful, apply the changes
+            for (int i = 0; i < addUserSharesRequest.sharesDelta().size(); i++) {
+                Company company = companyService.getById(addUserSharesRequest.sharesDelta().get(i).companyId());
+                int countShares = addUserSharesRequest.sharesDelta().get(i).countDelta();
+
                 company = company.withVacantSharesDelta(-countShares);
+                company = company.withDeltaMoney(countShares * company.getSharePrice());
                 if (countShares > 0 && !company.hasUser(user)) {
                     company = company.withNewUser(user);
                 } else if (countShares + user.countSharesOfCompany(company.getId()) == 0) {
@@ -252,8 +281,6 @@ public class UserController extends EntityController<UserService> {
                 }
 
                 companyService.update(company);
-
-                totalPrice += countShares * company.getSharePrice();
             }
 
             try {
@@ -262,12 +289,6 @@ public class UserController extends EntityController<UserService> {
             } catch (EntityNotFoundException e) {
                 return InformOfClientError(LOGGER,
                         "User with given id not found, id=" + id,
-                        response,
-                        e,
-                        400);
-            } catch (NegativeSharesException e) {
-                return InformOfClientError(LOGGER,
-                        "Failed to update shares since it results in negative number of shares",
                         response,
                         e,
                         400);

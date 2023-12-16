@@ -1,7 +1,11 @@
 import Entities.Company;
 import Entities.User;
+import Requests.ShareDelta;
 import database.Database;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -405,4 +409,26 @@ public class DatabaseTest {
         }
     }
     // endregion
+
+    @Test
+    public void SaveUsersOfCompanyWithShares() {
+        User user = new User(1, "userName", 0, "password");
+        Company company = new Company(1, "companyName", 100, 0, 0, 0, "password");
+
+        database.user.create(user);
+        database.company.create(company);
+
+        // Add 100 shares of company with id=1 to user
+        user =  user.withSharesDelta(List.of(new ShareDelta(1L, 100)));
+        company = company.withVacantSharesDelta(-100);
+        company = company.withNewUser(user);
+
+        database.user.update(user);
+        database.company.update(company);
+
+        List<User> users = database.user.getAll();
+        User retrievedUser = users.get(0);
+
+        assertEquals(100, retrievedUser.countSharesOfCompany(1L));
+    }
 }

@@ -1,13 +1,13 @@
 package Responses;
 
-import DTOs.CompanyDTO;
+import Entities.Company;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record FindCompanyResponse (CompanyDTO companyDTO) {
+public record FindCompanyResponse (Company company) {
     @JsonCreator
     public FindCompanyResponse(
-            @JsonProperty("companyDTO") CompanyDTO companyDTO) {
-        this.companyDTO = companyDTO;
+            @JsonProperty("company") Company company) {
+        this.company = company;
     }
 }

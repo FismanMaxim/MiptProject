@@ -6,30 +6,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.*;
 
-public record UserDTO(String name, double money, Map<Long, Integer> shares, String password) implements EntityDTO<User> {
+public record UserDTO(long id, String name, double money, Map<Long, Integer> shares) implements EntityDTO<User> {
     @JsonCreator
     public UserDTO(
+            @JsonProperty("id") long id,
             @JsonProperty("name") String name,
             @JsonProperty("money") double money,
-            @JsonProperty("shares") Map<Long, Integer> shares,
-            @JsonProperty("password") String password
+            @JsonProperty("shares") Map<Long, Integer> shares
     ) {
+        this.id = id;
         this.name = name;
         this.money = money;
         this.shares = shares;
-        this.password = password;
-    }
-
-    public UserDTO(String name, String password) {
-        this(name, 0, new HashMap<>(), password);
     }
 
     public UserDTO(User user) {
-        this(user.getUserName(), user.getMoney(), user.getCopyOfShares(), user.getPassword());
+        this(user.getId(), user.getUserName(), user.getMoney(), user.getCopyOfShares());
     }
 
     @Override
-    public User convertToTargetObject(long id) {
+    public User convertToTargetObject(String password) {
         return new User(id, name, money, password);
     }
 
@@ -38,11 +34,11 @@ public record UserDTO(String name, double money, Map<Long, Integer> shares, Stri
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserDTO userDTO = (UserDTO) o;
-        return Objects.equals(name, userDTO.name) && Objects.equals(password, userDTO.password);
+        return id == userDTO.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, password);
+        return Objects.hash(id);
     }
 }

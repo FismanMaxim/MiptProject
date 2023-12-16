@@ -2,14 +2,13 @@ package database;
 
 import Entities.Company;
 import Entities.User;
+import EntitiesRepositories.EntityRepository;
+import org.postgresql.core.Encoding;
+import org.postgresql.util.HStoreConverter;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-
-import EntitiesRepositories.EntityRepository;
-import org.postgresql.core.Encoding;
-import org.postgresql.util.HStoreConverter;
 
 public class Database {
     String jdbcUrl = "jdbc:postgresql://localhost:5432/onlinetrade";
@@ -29,15 +28,12 @@ public class Database {
         }
     }
 
-    static private String Hstoryfy(Map<Long, Integer> map) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (var i : map.entrySet()) {
-            stringBuilder.append(String.format("'\"%s\"=>\"%s\"',",
-                    i.getKey().toString()
-                    , i.getValue().toString()));
+    protected void finalize(){
+        if (connection != null) {
+            dropConnection();
         }
-        return stringBuilder.toString();
     }
+
 
     public Database(Connection connection) {
         this.connection = connection;
@@ -82,14 +78,17 @@ public class Database {
 
                         Map<String, String> shares;
                         try {
+//                            String[] hstoreData = resultSet.getString(
+//                                    "shares").split(",");
                             shares =
-                                    HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
-                        } catch (ArrayIndexOutOfBoundsException e) {
+                                    HStoreConverter.fromString(resultSet.getString(
+                                            "shares"));
+                        } catch (Throwable e) {
                             shares = new HashMap<>();
                         }
                         Map<Long, Integer> sharesConverted = new HashMap<>();
                         for (var keys : shares.entrySet()) {
-                            sharesConverted.put(Long.getLong(keys.getKey()),
+                            sharesConverted.put(Long.valueOf(keys.getKey()),
                                     Integer.valueOf(keys.getValue()));
                         }
                         users.add(new User(id, name, money, sharesConverted,
@@ -126,13 +125,14 @@ public class Database {
                     Map<String, String> shares;
                     try {
                         shares =
-                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                                HStoreConverter.fromString(resultSet.getString(
+                                        "shares"));
                     } catch (ArrayIndexOutOfBoundsException e) {
                         shares = new HashMap<>();
                     }
                     Map<Long, Integer> sharesConverted = new HashMap<>();
                     for (var keys : shares.entrySet()) {
-                        sharesConverted.put(Long.getLong(keys.getKey()),
+                        sharesConverted.put(Long.valueOf(keys.getKey()),
                                 Integer.valueOf(keys.getValue()));
                     }
                     return new User(id, name, money, sharesConverted, password);
@@ -165,13 +165,14 @@ public class Database {
                     Map<String, String> shares;
                     try {
                         shares =
-                                HStoreConverter.fromBytes(resultSet.getBytes("shares"), Encoding.defaultEncoding());
+                                HStoreConverter.fromString(resultSet.getString(
+                                        "shares"));
                     } catch (ArrayIndexOutOfBoundsException e) {
                         shares = new HashMap<>();
                     }
                     Map<Long, Integer> sharesConverted = new HashMap<>();
                     for (var keys : shares.entrySet()) {
-                        sharesConverted.put(Long.getLong(keys.getKey()),
+                        sharesConverted.put(Long.valueOf(keys.getKey()),
                                 Integer.valueOf(keys.getValue()));
                     }
                     return new User(id, name, money, sharesConverted, password);
@@ -188,21 +189,18 @@ public class Database {
 
             // SQL-запрос для добавления пользователя
             String insertUserQuery = "INSERT INTO users (id, name, money, " +
-                    "shares, password) VALUES (?, ?, ?, ?, ?)";
+                    "shares, password) VALUES (?, ?, ?, hstore(?), ?)";
 
             // Создание PreparedStatement для выполнения запроса
             try {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(insertUserQuery);
                 // Установка значений параметров
-                preparedStatement.setString(4,
-                        Hstoryfy(user.getCopyOfShares()));
-                preparedStatement =
-                        connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setLong(1, user.getId());
                 preparedStatement.setString(2, user.getUserName());
                 preparedStatement.setDouble(3, user.getMoney());
-                preparedStatement.setString(4, user.getPassword());
+                preparedStatement.setString(4, HStoreConverter.toString(user.getCopyOfShares()));
+                preparedStatement.setString(5, user.getPassword());
                 // Выполнение запроса
                 int rowsAffected = preparedStatement.executeUpdate();
 
@@ -220,20 +218,19 @@ public class Database {
         public void update(User user) {
             // SQL-запрос для обновления пользователя
             String updateUserQuery = "UPDATE users SET name = ?, money = ?, " +
-                    "shares = ?, password = ? WHERE id = ?";
+                    "shares = hstore(?), password = ? WHERE id = ?";
 
             // Создание PreparedStatement для выполнения запроса
             try {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(updateUserQuery);
                 // Установка значений параметров
-                preparedStatement.setString(3, Hstoryfy(user.getCopyOfShares()));
-                preparedStatement =
-                        connection.prepareStatement(preparedStatement.toString());
                 preparedStatement.setString(1, user.getUserName());
                 preparedStatement.setDouble(2, user.getMoney());
-                preparedStatement.setString(3, user.getPassword());
-                preparedStatement.setLong(4, user.getId());
+                preparedStatement.setString(3,
+                        HStoreConverter.toString(user.getCopyOfShares()));
+                preparedStatement.setString(4, user.getPassword());
+                preparedStatement.setLong(5, user.getId());
                 // Выполнение запроса
                 int rowsAffected = preparedStatement.executeUpdate();
 
