@@ -27,7 +27,7 @@ class WebsiteControllerTest {
     void initService() {
         service = Service.ignite();
 
-        ControllersManager manager = new ControllersManager(List.of(new WebsiteController(service, mapper)));
+        ControllersManager manager = new ControllersManager(List.of(new WebsiteController(/*service,*/ TemplateFactory.freeMarkerEngine(), mapper)));
 
         manager.start();
         service.awaitInitialization();
