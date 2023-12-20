@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static spark.Spark.staticFileLocation;
+import static spark.Spark.*;
 
 public class Main {
 
@@ -20,8 +20,7 @@ public class Main {
     public static void main(String[] args) {
         staticFileLocation("/public");
 
-        // Service service = Service.ignite();
-
+        init();
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
 
         UserService userService = new UserService(new InMemoryUserRepository());
@@ -32,7 +31,7 @@ public class Main {
         ));
 
         manager.start();
-        //service.awaitInitialization();
-        //service.awaitStop();
+        awaitInitialization();
+        awaitStop();
     }
 }
