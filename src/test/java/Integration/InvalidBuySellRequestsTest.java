@@ -12,7 +12,6 @@ import Responses.EntityIdResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import database.Database;
 import org.junit.jupiter.api.*;
-import spark.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,9 +24,9 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static spark.Spark.*;
 
 public class InvalidBuySellRequestsTest {
-    private Service service;
     private static ObjectMapper mapper;
     private static Database database;
 
@@ -85,7 +84,7 @@ public class InvalidBuySellRequestsTest {
                                                 "{\"name\": \"testName\", \"password\": \"companyPass\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -106,7 +105,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -120,11 +119,6 @@ public class InvalidBuySellRequestsTest {
 
     @BeforeEach
     void initService() {
-        service = Service.ignite();
-
-//        EntityRepository<User> userRepository = new InMemoryUserRepository();
-//        EntityRepository<Company> companyRepository = new InMemoryCompanyRepository();
-
         EntityRepository<User> userRepository = database.user;
         EntityRepository<Company> companyRepository = database.company;
 
@@ -132,12 +126,13 @@ public class InvalidBuySellRequestsTest {
         UserService userService = new UserService(userRepository);
 
         ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
+                new CompanyController(/*service,*/ companyService, mapper),
+                new UserController(/*service,*/ userService, companyService, mapper)
         ));
 
         manager.start();
-        service.awaitInitialization();
+        init();
+        awaitInitialization();
     }
 
     @AfterAll
@@ -159,8 +154,8 @@ public class InvalidBuySellRequestsTest {
 
     @AfterEach
     void stopService() {
-        service.stop();
-        service.awaitStop();
+        stop();
+        awaitStop();
     }
     // endregion
 
@@ -182,7 +177,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"deltaMoney": %d}""".formatted(countSharesPart * sharePrice)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -200,7 +195,7 @@ public class InvalidBuySellRequestsTest {
                                                         .formatted(countSharesPart, sharePrice)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), companyId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -218,7 +213,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, countUserBuys)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -243,7 +238,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"deltaMoney": %d}""".formatted(buySharesCount * sharePrice)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -261,7 +256,7 @@ public class InvalidBuySellRequestsTest {
                                                         .formatted(buySharesCount, sharePrice)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), companyId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -279,7 +274,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, buySharesCount)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -295,7 +290,7 @@ public class InvalidBuySellRequestsTest {
                                                         {"sharesDelta":[{"companyId":%d,"countDelta":%d}]}""".formatted(companyId, -sellSharesCount)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );

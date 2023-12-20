@@ -15,7 +15,6 @@ import Responses.FindUserResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import database.Database;
 import org.junit.jupiter.api.*;
-import spark.Service;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -28,9 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static spark.Spark.*;
 
 public class EntitiesCRUDTest {
-    private Service service;
     private static ObjectMapper mapper;
 
     private static Database database;
@@ -94,11 +93,6 @@ public class EntitiesCRUDTest {
 
     @BeforeEach
     void initService() {
-        service = Service.ignite();
-
-//        EntityRepository<User> userRepository = new InMemoryUserRepository();
-//        EntityRepository<Company> companyRepository = new InMemoryCompanyRepository();
-
         EntityRepository<User> userRepository = database.user;
         EntityRepository<Company> companyRepository = database.company;
 
@@ -106,18 +100,19 @@ public class EntitiesCRUDTest {
         UserService userService = new UserService(userRepository);
 
         ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
+                new CompanyController(/*service, */companyService, mapper),
+                new UserController(/*service, */userService, companyService, mapper)
         ));
 
         manager.start();
-        service.awaitInitialization();
+        init();
+        awaitInitialization();
     }
 
     @AfterEach
     void stopService() {
-        service.stop();
-        service.awaitStop();
+        stop();
+        awaitStop();
     }
 
     @Test
@@ -131,7 +126,7 @@ public class EntitiesCRUDTest {
                                                 "{\"name\": \"testName\", \"password\": \"companyPass\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -151,7 +146,7 @@ public class EntitiesCRUDTest {
                                                         {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -171,7 +166,7 @@ public class EntitiesCRUDTest {
                                                         {"name": "newUserName", "deltaMoney": 5000}"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -188,7 +183,7 @@ public class EntitiesCRUDTest {
                                                         "\"deltaShares\": 100, \"sharePrice\": 100, \"threshold\": 25}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), companyId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -206,7 +201,7 @@ public class EntitiesCRUDTest {
                                                         {"sharesDelta":[{"companyId":%d,"countDelta":50}]}""".formatted(companyId)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -224,7 +219,7 @@ public class EntitiesCRUDTest {
                                                         {"sharesDelta":[{"companyId":%d,"countDelta":-10}]}""".formatted(companyId)
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d/shares".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -237,7 +232,7 @@ public class EntitiesCRUDTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), companyId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -260,7 +255,7 @@ public class EntitiesCRUDTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -277,7 +272,7 @@ public class EntitiesCRUDTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .DELETE()
-                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(service.port(), userId)))
+                                .uri(URI.create("http://localhost:%d/api/usr/%d".formatted(port(), userId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -289,7 +284,7 @@ public class EntitiesCRUDTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .DELETE()
-                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(service.port(), companyId)))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), companyId)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
