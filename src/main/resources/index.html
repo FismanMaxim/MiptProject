@@ -10,18 +10,17 @@
 		
 		<script src="Objects/interface.js" defer></script>
 		<script src="Objects/classes.js" defer></script>
-		<script src="Objects/requests.js" defer></script>
+		<script src="Objects/requests.js" async></script>
 		<link rel="stylesheet" href="Objects/index.css">
 	</head>
 	<body onselectstart="return false" onload="prepairPage()">
 		<div class="registerBlock">
-			<div class="registerBG"></div>
-			<form class="registerForm">
+			<div class="registerForm">
 				<div class="registerDataContainer rdc">
 					<div class="registerNameBlock"><div class="registerName flexable"><span>Registration</span></div></div>
 					<div class="registerFormContainer rfc flexable">
 						<div class="registerInput"><input class="input rInputEmail" type="email" placeholder="your@mail.com" required></div>
-						<div class="registerInput"><input class="input rInputName" type="text" placeholder="Username" required></div>
+						<div class="registerInput"><input class="input rInputName" type="text" placeholder="Login" required></div>
 						<div class="registerInput"><input class="input rInputPass" type="password" placeholder="Password" required></div>
 						<div class="registerInput"><input class="input rInputNick" type="text" placeholder="Nickname" required></div>
 						<div class="registerToggle">
@@ -35,8 +34,8 @@
 						</div>
 					</div>
 				</div>
-			</form>
-			<form class="loginForm">
+			</div>
+			<div class="loginForm">
 				<div class="registerDataContainer ldc">
 					<div class="registerName flexable"><span>Login</span></div>
 					<div class="registerFormContainer lfc flexable">
@@ -53,39 +52,54 @@
 						</div>
 					</div>
 				</div>
-			</form>
+			</div>
+			<div class="registerBG" onclick="closeForm()"></div>
 		</div>
 		<div class="transactionBlock">
-			<form class="sharesUpdateForm">
+			<div class="sharesUpdateForm">
 				<div class="sharesUpdateContainer flexable">
 					<div class="transactionCompanyName flexable"><span class="companyName">Company Name</span></div>
 					<div class="transactionCompanyCost flexable"><span class="companyCost">Shares Cost</span></div>
 					
-					<div class="transactionUserBalance flexable"><span class="transactionUserValue">You havn't got shares of this company</span></div>
+					<div class="transactionUserBalance flexable"><span class="transactionUserValue"></span></div>
 					<div class="transactionButtonsBlock flexable clickable">
 						<div class="sharesTransactionBuyButton tButton flexable" onclick="confirmBuy()"><span>Buy shares</span></div>
 						<div class="sharesTransactionBuyButton tButton flexable" onclick="confirmSel()"><span>Sell shares</span></div>
 					</div>
 				</div>
-			</form>
-			<div class="transactionBG" onclick="removeTransitionForm()"></div>
+			</div>
+			<div class="transactionBG" onclick="removeTransactionForm()"></div>
 		</div>
-		<div class="transactionConfirmBlock">
-			<form class="sharesConfirmForm">
-				<div class="sharesConfirmContainer flexable">
+		<div class="transactionsConfirmBlock TCB">
+			<div class="transactionsConfirmForm">
+				<div class="transactionsConfirmContainer flexable">
 					<div class="registerInput"><input class="input lInputSharesDelta" type="text" placeholder="Enter the number of" required></div>
-					<div class="sharesTransactionConfirmBuyButton flexable" onclick="buyShares()"><span>shares to buy</span></div>
-					<div class="sharesTransactionConfirmSelButton flexable" onclick="selShares()"><span>shares to sell</span></div>
+					<div type="submit" class="transactionButton sharesTransactionConfirmBuyButton flexable" onclick="buyShares()"><span>shares to buy</span></div>
+					<div type="submit" class="transactionButton sharesTransactionConfirmSelButton flexable" onclick="selShares()"><span>shares to sell</span></div>
+					<div type="submit" class="transactionButton budgetTransactionConfirmSelButton flexable" onclick="refillBalanceUser()"><span>toncoins to refil</span></div>
+					<div type="submit" class="transactionButton budgetCompanyTransactionConfirmSelButton flexable" onclick="refillBalanceCompany()"><span>toncoins to refil</span></div>
+					<div type="submit" class="transactionButton changeSharesCostTransactionButton flexable" onclick="changeSharesCost()"><span>shares cost</span></div>
+					<div type="submit" class="transactionButton changeSharesAmountTransactionButton flexable" onclick="changeDeltaShares()"><span>shares amount</span></div>
+					<div type="submit" class="transactionButton changeThresholdTransactionButton flexable" onclick="changeThreshold()"><span>threshold</span></div>
 				</div>
-			</form>
-			<div class="transactionCBG" onclick="removeTransitionConfirmForm()"></div>
+			</div>
+			<div class="transactionCBG" onclick="removeTransactionConfirmForm()"></div>
+		</div>
+		<div class="transactionsConfirmBlock TCBText">
+			<div class="transactionsConfirmForm">
+				<div class="transactionsConfirmContainer flexable">
+					<div class="registerInput"><input class="input rInputSharesDelta" type="text" placeholder="Your new name" required></div>
+					<div type="submit" class="transactionButton changeUserNameTransactionButton flexable" onclick="changeUserName()"><span>Update name</span></div>
+					<div type="submit" class="transactionButton changeCompanyNameTransactionButton flexable" onclick="changeCompanyName()"><span>Update name</span></div>
+				</div>
+			</div>
+			<div class="transactionCBG" onclick="removeTransactionConfirmForm()"></div>
 		</div>
 		<header class="header flexable">
 			<div class="logoContainer flexable">
 				<div class="logoIconContainer flexable">
 					<div class="logo flexable"></div>
 				</div>
-				
 				<div class="logoNameContainer flexable">
 					<div class="logoName flexable">
 						<span>Акции</span>
@@ -101,7 +115,41 @@
 						<span>Sign Up</span>
 					</div>
 				</div>
+				<div class="accountContainer flexable">
+					<div class="accountName flexable"><span class="nameText"></span></div>
+					<div class="menuButton flexable"><div class="menuButtonIcon" onclick="openMenu()"></div></div>
+				</div>
 				<div class="rDecorBlock"></div>
+			</div>
+			<div class="accountMenuContainer accountUserMenuContainer flexable">
+				<div class="accountMenuTopBlock"></div>
+				<div class="accountMenuMidBlock flexable">
+					<div class="menuAccountButton getPersonalDataButton flexable" onclick="getUserInfo()"><span>Get info</span></div>
+					<div class="balanceInfo infoBlock flexable"><span>Balance: </span><span class="userBalanceText"></span></div>
+					<div class="menuAccountButton updateBalanceButton flexable" onclick="updateUserBalance()"><span>Top up balance</span></div>
+					<div class="menuAccountButton changeNameButton flexable"onclick="updateUserName()"><span>Change name</span></div>
+				</div>
+				<div class="accountMenuBotBlock flexable">
+					<div class="menuAccountButton deleteAccountButton flexable" onclick="deleteUser()"><span>Delete account</span></div>
+				</div>
+			</div>
+			<div class="accountMenuContainer accountCompanyMenuContainer flexable">
+				<div class="accountMenuTopBlock"></div>
+				<div class="accountMenuMidBlock flexable">
+					<div class="menuAccountButton menuAccountEnd getPersonalDataButton flexable" onclick="getCompanyInfo()"><span>Get info</span></div>
+					<div class="balanceInfo infoBlock flexable"><span>Balance: </span><span class="companyBalanceText"></span></div>
+					<div class="menuAccountButton menuAccountEnd updateBalanceButton flexable" onclick="updateCompanyBalance()"><span>Top up balance</span></div>
+					<div class="sharesInfo infoBlock flexable"><span>Shares amount: </span><span class="companySharesAmountText"></span></div>
+					<div class="menuAccountButton menuAccountEnd changeDeltaSharesButton flexable" onclick="updateSharesAmount()"><span>Update amount</span></div>
+					<div class="sharesInfo infoBlock flexable"><span>Shares cost: </span><span class="companySharesCostText"></span></div>
+					<div class="menuAccountButton menuAccountEnd changeDeltaSharesButton flexable" onclick="updateSharesCost()"><span>Update cost</span></div>
+					<div class="thresholdInfo infoBlock flexable"><span>Threshold number: </span><span class="thresholdText"></span></div>
+					<div class="menuAccountButton menuAccountEnd changeThresholdButton flexable" onclick="updateThreshold()"><span>Update Threshold</span></div>
+					<div class="menuAccountButton changeCompanyNameButton flexable" onclick="updateCompanyName()"><span>Change name</span></div>
+				</div>
+				<div class="accountMenuBotBlock flexable">
+					<div class="menuAccountButton deleteAccountButton flexable" onclick="deleteCompany()"><span>Delete account</span></div>
+				</div>
 			</div>
 		</header>
 		<main class="main flexable">
@@ -114,7 +162,9 @@
 				<div class="mainReviewTabs flexable">
 					<div class="reviewButton clickable sharesButton flexable" id="activeReviewButton" onclick="chooseReviewTab('shares')"><span>Stocks</span></div>
 					<div class="reviewButton clickable newsButton flexable" onclick="chooseReviewTab('news')"><span>News</span></div>
-					<div class="reviewButton clickable logsButton flexable" onclick="chooseReviewTab('logs')"><span>Logs</span></div>
+					<div class="reviewButton clickable transactionsButton flexable" onclick="chooseReviewTab('transactions')"><span>Transactions</span></div>
+					
+					<div class="tableReloadButton" onclick="getSortedCompanyList()"></div>
 				</div>
 				<div class="mainReviewTableContainer flexable">
 					<div class="mainReviewTable">
@@ -122,15 +172,28 @@
 							<tr>
 								<th>Shareholder</th>
 								<th>Share price</th>
-								<th>Threshold value</th>
+								<th>TotalShares</th>
 							</tr>
 						</table>
 						<div class="newsBlock">
-						
+							<!--noindex--><iframe src="https://quote.rbc.ru/tag/stocks" width="800" height="600" scrolling="auto">
+							</iframe><!--/noindex-->
 						</div>
-						<div class="logsBlock">
-						
+						<div class="transactionsBlock flexable">
+							<div class="transactionsLogArticleContainer"><div class="transactionsLogArticle flexable"><span>Your transactions history</span></div></div>
+							<div class="transactionsLogHistory flexable"></div>
 						</div>
+					</div>
+				</div>
+				<div class="tableFilterContainer flexable">
+					<div class="filterBlock sortFilter flexable" onclick="setSortingFilter()">
+						<div class="filterBlockIcon sortFilterIcon"></div>
+					</div>
+					<div class="tableFilterInputBlock">
+						<input class="input lInputSharesDelta tableFilterInput" type="text" placeholder="May be you want...">
+					</div>
+					<div class="filterBlock obtainFilter flexable" onclick="setObtainingFilter()">
+						<div class="filterBlockIcon obtainFilterIcon"></div>
 					</div>
 				</div>
 			</div>
@@ -144,5 +207,13 @@
 				</div>
 			</div>
 		</footer>
+		<div class="accountDataContainer flexable">
+			<div class="accountDataBlock">
+				<div class="accountDataCloseButton flexable" onclick="closeDataContainer()"><div class="accountDataCloseIcon"></div></div>
+				<div class="personalDataBlock">
+					
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
