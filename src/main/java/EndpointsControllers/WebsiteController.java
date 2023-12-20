@@ -18,8 +18,8 @@ public class WebsiteController extends EndpointsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
     private final FreeMarkerEngine freeMarkerEngine;
 
-    public WebsiteController(/*Service service,*/ FreeMarkerEngine freeMarkerEngine, ObjectMapper objectMapper) {
-        super(/*service, */objectMapper);
+    public WebsiteController(FreeMarkerEngine freeMarkerEngine, ObjectMapper objectMapper) {
+        super(objectMapper);
 
         this.freeMarkerEngine = freeMarkerEngine;
     }

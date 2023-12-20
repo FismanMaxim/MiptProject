@@ -1,6 +1,9 @@
 package EndpointsControllers.EntitiesControllers;
 
-import CustomExceptions.*;
+import CustomExceptions.CreateEntityException;
+import CustomExceptions.DeleteEntityException;
+import CustomExceptions.GetEntityException;
+import CustomExceptions.UpdateEntityException;
 import Entities.Company;
 import EntitiesServices.CompanyService;
 import Requests.AuthenticationRequest;
@@ -15,16 +18,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
-import spark.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static spark.Spark.*;
+
 public class CompanyController extends EntityController<CompanyService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
 
-    public CompanyController(Service service, CompanyService companyService, ObjectMapper objectMapper) {
-        super(service, companyService, objectMapper);
+    public CompanyController(/*Service service,*/ CompanyService companyService, ObjectMapper objectMapper) {
+        super(/*service,*/ companyService, objectMapper);
     }
 
     @Override
@@ -38,7 +42,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     private void createCompanyEndpoint() {
-        service.post("/api/company", (Request request, Response response) -> {
+        /*service.*/post("/api/company", (Request request, Response response) -> {
             response.type("application.json");
 
             CreateEntityRequest createRequest;
@@ -67,7 +71,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     private void getCompanyByIdEndpoint() {
-        service.get("/api/company/:companyId", (Request request, Response response) -> {
+        /*service.*/get("/api/company/:companyId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
@@ -96,7 +100,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     void getCompanyIdByNamePasswordEndpoint() {
-        service.post("/api/company/auth", (Request request, Response response) -> {
+        /*service.*/post("/api/company/auth", (Request request, Response response) -> {
             response.type("application.json");
 
             AuthenticationRequest authenticateRequest;
@@ -125,7 +129,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     private void getAllCompaniesEndpoint() {
-        service.get("/api/company", (Request request, Response response) -> {
+        /*service.*/get("/api/company", (Request request, Response response) -> {
             response.type("application.json");
 
             try {
@@ -147,7 +151,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     private void updateCompanyEndpoint() {
-        service.put("/api/company/:companyId", (Request request, Response response) -> {
+        /*service.*/put("/api/company/:companyId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
@@ -226,7 +230,7 @@ public class CompanyController extends EntityController<CompanyService> {
     }
 
     private void deleteCompanyEndpoint() {
-        service.delete("/api/company/:companyId", (Request request, Response response) -> {
+        /*service.*/delete("/api/company/:companyId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
