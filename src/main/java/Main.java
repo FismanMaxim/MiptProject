@@ -22,20 +22,13 @@ public class Main {
 
         // Service service = Service.ignite();
 
-        /*get("/test", (Request request, Response response) -> {
-            response.type("text/html; charset=utf-8");
-
-            Map<String, Object> model = new HashMap<>();
-            return TemplateFactory.freeMarkerEngine().render(new ModelAndView(model, "index1.html"));
-        });*/
-
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
 
         UserService userService = new UserService(new InMemoryUserRepository());
         ControllersManager manager = new ControllersManager(List.of(
-                new WebsiteController(/*service, */TemplateFactory.freeMarkerEngine(), mapper),
-                new CompanyController(/*service,*/ companyService, mapper),
-                new UserController(/*service, */userService, companyService, mapper)
+                new WebsiteController(TemplateFactory.freeMarkerEngine(), mapper),
+                new CompanyController(companyService, mapper),
+                new UserController(userService, companyService, mapper)
         ));
 
         manager.start();
