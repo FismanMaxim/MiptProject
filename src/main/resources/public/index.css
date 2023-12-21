@@ -1,7 +1,3 @@
-@font-face{
-	font-family: Neon;
-	src: url("ANESA.ttf");
-}
 :root {
   --main-color: rgb(60, 60, 60);
   --input-color: #8e8e8e;
