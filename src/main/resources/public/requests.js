@@ -255,15 +255,12 @@ async function buyShares() {
 	data.append('sharesDelta', delta);
 	data.append('companyId', companyId);
 	
-	console.log(data)
-	
 	if (!checkData(data)){
 		selectInput()
 		return;
 	}
 	
 	const body = JSON.stringify({'sharesDelta': [{'companyId':companyId, 'countDelta':delta}]});
-	console.log(body);
 	
 	await fetch(url+"/usr/" + userId +"/shares", {
 		method:"PUT", 
@@ -277,7 +274,7 @@ async function buyShares() {
 		.catch(error => createTransactionLog(error));
 		
 	getAccountById();
-	updateShares();
+	removeTransactionForm();
 	
 	removeTransactionConfirmForm();
 }
@@ -319,7 +316,7 @@ async function selShares() {
 		.catch(error => createTransactionLog(error));
 		
 	getAccountById();
-	updateShares();
+	removeTransactionForm();
 	
 	removeTransactionConfirmForm();
 }
@@ -345,7 +342,6 @@ async function refillBalanceUser() {
 	}
 	
 	const body = JSON.stringify({'deltaMoney': delta});
-	console.log(body + "  **");
 	
 	await fetch(url+"/usr/" + userId, {
 		method:"PUT", 

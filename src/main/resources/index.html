@@ -1,4 +1,4 @@
-<html onselectstart="return false">
+<html onselectstart="return false" lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
@@ -24,13 +24,13 @@
 						<div class="registerInput"><input class="input rInputPass" type="password" placeholder="Password" required></div>
 						<div class="registerInput"><input class="input rInputNick" type="text" placeholder="Nickname" required></div>
 						<div class="registerToggle">
-							<div class="rToggleText flexable"><span>Corporative account</span></div>
+							<div class="rToggleText flexable"><span>Corporate account</span></div>
 							<input class="toggle rToggle" type="checkbox">
 						</div>
 					</div>
 					<div class="submitButtonContainer flexable">
 						<div class="submitButton flexable">
-							<div class="submit flexable" onclick="registration()"><span>Sumbit</span></div>
+							<div class="submit flexable" onclick="registration()"><span>Submit</span></div>
 						</div>
 					</div>
 				</div>
@@ -42,13 +42,13 @@
 						<div class="registerInput"><input class="input lInputName" type="text" placeholder="Username" required></div>
 						<div class="registerInput"><input class="input lInputPass" type="password" placeholder="Password" required></div>
 						<div class="registerToggle">
-							<div class="rToggleText flexable"><span>Corporative account</span></div>
+							<div class="rToggleText flexable"><span>Corporate account</span></div>
 							<input class="toggle lToggle" type="checkbox">
 						</div>
 					</div>
 					<div class="submitButtonContainer flexable">
 						<div class="submitButton flexable">
-							<div class="submit flexable" onclick="authorization()"><span>Sumbit</span></div>
+							<div class="submit flexable" onclick="authorization()"><span>Submit</span></div>
 						</div>
 					</div>
 				</div>
@@ -60,6 +60,7 @@
 				<div class="sharesUpdateContainer flexable">
 					<div class="transactionCompanyName flexable"><span class="companyName">Company Name</span></div>
 					<div class="transactionCompanyCost flexable"><span class="companyCost">Shares Cost</span></div>
+					<div class="transactionCompanyThres flexable"><span class="companyThreshold">Threshold value</span></div>
 					
 					<div class="transactionUserBalance flexable"><span class="transactionUserValue"></span></div>
 					<div class="transactionButtonsBlock flexable clickable">
@@ -74,13 +75,13 @@
 			<div class="transactionsConfirmForm">
 				<div class="transactionsConfirmContainer flexable">
 					<div class="registerInput"><input class="input lInputSharesDelta" type="text" placeholder="Enter the number of" required></div>
-					<div type="submit" class="transactionButton sharesTransactionConfirmBuyButton flexable" onclick="buyShares()"><span>shares to buy</span></div>
-					<div type="submit" class="transactionButton sharesTransactionConfirmSelButton flexable" onclick="selShares()"><span>shares to sell</span></div>
-					<div type="submit" class="transactionButton budgetTransactionConfirmSelButton flexable" onclick="refillBalanceUser()"><span>toncoins to refil</span></div>
-					<div type="submit" class="transactionButton budgetCompanyTransactionConfirmSelButton flexable" onclick="refillBalanceCompany()"><span>toncoins to refil</span></div>
-					<div type="submit" class="transactionButton changeSharesCostTransactionButton flexable" onclick="changeSharesCost()"><span>shares cost</span></div>
-					<div type="submit" class="transactionButton changeSharesAmountTransactionButton flexable" onclick="changeDeltaShares()"><span>shares amount</span></div>
-					<div type="submit" class="transactionButton changeThresholdTransactionButton flexable" onclick="changeThreshold()"><span>threshold</span></div>
+					<div class="transactionButton sharesTransactionConfirmBuyButton flexable" onclick="buyShares()"><span>shares to buy</span></div>
+					<div class="transactionButton sharesTransactionConfirmSelButton flexable" onclick="selShares()"><span>shares to sell</span></div>
+					<div class="transactionButton budgetTransactionConfirmSelButton flexable" onclick="refillBalanceUser()"><span>toncoins to refil</span></div>
+					<div class="transactionButton budgetCompanyTransactionConfirmSelButton flexable" onclick="refillBalanceCompany()"><span>toncoins to refil</span></div>
+					<div class="transactionButton changeSharesCostTransactionButton flexable" onclick="changeSharesCost()"><span>shares cost</span></div>
+					<div class="transactionButton changeSharesAmountTransactionButton flexable" onclick="changeDeltaShares()"><span>shares amount</span></div>
+					<div class="transactionButton changeThresholdTransactionButton flexable" onclick="changeThreshold()"><span>threshold</span></div>
 				</div>
 			</div>
 			<div class="transactionCBG" onclick="removeTransactionConfirmForm()"></div>
@@ -89,8 +90,8 @@
 			<div class="transactionsConfirmForm">
 				<div class="transactionsConfirmContainer flexable">
 					<div class="registerInput"><input class="input rInputSharesDelta" type="text" placeholder="Your new name" required></div>
-					<div type="submit" class="transactionButton changeUserNameTransactionButton flexable" onclick="changeUserName()"><span>Update name</span></div>
-					<div type="submit" class="transactionButton changeCompanyNameTransactionButton flexable" onclick="changeCompanyName()"><span>Update name</span></div>
+					<div class="transactionButton changeUserNameTransactionButton flexable" onclick="changeUserName()"><span>Update name</span></div>
+					<div class="transactionButton changeCompanyNameTransactionButton flexable" onclick="changeCompanyName()"><span>Update name</span></div>
 				</div>
 			</div>
 			<div class="transactionCBG" onclick="removeTransactionConfirmForm()"></div>
@@ -127,7 +128,7 @@
 					<div class="menuAccountButton getPersonalDataButton flexable" onclick="getUserInfo()"><span>Get info</span></div>
 					<div class="balanceInfo infoBlock flexable"><span>Balance: </span><span class="userBalanceText"></span></div>
 					<div class="menuAccountButton updateBalanceButton flexable" onclick="updateUserBalance()"><span>Top up balance</span></div>
-					<div class="menuAccountButton changeNameButton flexable"onclick="updateUserName()"><span>Change name</span></div>
+					<div class="menuAccountButton changeNameButton flexable" onclick="updateUserName()"><span>Change name</span></div>
 				</div>
 				<div class="accountMenuBotBlock flexable">
 					<div class="menuAccountButton deleteAccountButton flexable" onclick="deleteUser()"><span>Delete account</span></div>
@@ -156,7 +157,7 @@
 			<div class="mainContainer flexable">
 				<div class="mainInfoContainer flexable">
 					<div class="mainInfo flexable">
-						<span>Деловые новости</span>
+						<span>Business news</span>
 					</div>
 				</div>
 				<div class="mainReviewTabs flexable">
@@ -170,13 +171,13 @@
 					<div class="mainReviewTable">
 						<table class="sharesBlock" id="activeReviewBlock">
 							<tr>
-								<th>Shareholder</th>
+								<th>Issuer</th>
 								<th>Share price</th>
-								<th>TotalShares</th>
+								<th>Available shares</th>
 							</tr>
 						</table>
 						<div class="newsBlock">
-							<!--noindex--><iframe src="https://quote.rbc.ru/tag/stocks" width="800" height="600" scrolling="auto">
+							<!--noindex--><iframe src="https://quote.rbc.ru/tag/stocks" width="800" height="600">
 							</iframe><!--/noindex-->
 						</div>
 						<div class="transactionsBlock flexable">

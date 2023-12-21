@@ -44,12 +44,13 @@ function closeForm() {
 	document.querySelector(".main").style.filter = "blur(0px)";
 }
 
-function editShares(id, name, cost) {
+function editShares(id, name, cost, threshold) {
 	if (activeId.id >= 0 && isActiveCompany.flag == false) {
 		chosenCompany = new ChosenCompany(id, name);
 		
 		document.querySelector(".companyName").innerHTML = "Issuer: " + name;
 		document.querySelector(".companyCost").innerHTML = "The share price is " + cost;
+		document.querySelector(".companyThreshold").innerHTML = "Threshold value is " + threshold;
 		document.querySelector(".transactionBlock").style.display = "flex";
 		if (activeUser.shares[id] > 0) {
 			document.querySelector(".transactionUserValue").innerHTML = "You have " + activeUser.shares[id] + " shares";
@@ -126,7 +127,12 @@ let sortedCompanyList;
 
 function fillCompanyTable() {
 	let table = document.querySelector(".sharesBlock");
-	table.innerHTML = "<tr><th>Issuer</th><th>Share price</th><th>Available shares</th></tr>";
+	
+	if (activeId.id >= 0 && isActiveCompany.flag == false) {
+		table.innerHTML = "<tr><th>Issuer</th><th>Your share</th><th>Key shareholder</th><th>Share price</th><th>Available shares</th></tr>";
+	} else {
+		table.innerHTML = "<tr><th>Issuer</th><th>Share price</th><th>Available shares</th>";
+	}
 	
 	try {
 		sortedCompanyList.forEach((company) => {
@@ -135,24 +141,34 @@ function fillCompanyTable() {
 			html.push(
 				"<td>",
 				company.companyName,
-				"</td><td>",
-				company.sharePrice,
 				"</td><td>"
 			);
 			if (activeId.id >= 0 && isActiveCompany.flag == false) {
 				html.push(
-					company.totalShares,
+					sharesAmount(activeUser, parseInt(company.id)),
+					"</td><td>",
+					isVip(activeUser, company.id),
+					"</td><td>",
+					company.sharePrice,
+					"</td><td>",
+					company.vacantShares,
 					"<div class=\"editButton\" onclick=\"editShares(",
 					company.id,
 					", \'",
 					company.companyName,
 					"\', ",
 					company.sharePrice,
+					", ",
+					company.keyShareholderThreshold,
 					")\"></div></td>"
+					
 				);
 			} else {
 				html.push(
-					company.vacantShares
+					company.sharePrice,
+					"</td><td>",
+					company.vacantShares,
+					"</td>"
 				);
 			}
 			companyBlock.innerHTML = html.join("");
@@ -242,11 +258,13 @@ function getUserInfo() {
 	
 	for (let companyId in activeUser.shares) {
 		html.push(
-			"<div class='personalDataRaw personalDataLevel2 flexable'><span>CompanyName: ",
+			"<div class='personalDataRaw personalDataLevel2 flexable'><span>",
 			companyList.get(parseInt(companyId)).companyName,
-			"</span><span>Shares amount: ",
+			"</span><span>Shares: ",
 			activeUser.shares[parseInt(companyId)],
-			"</span></div>",
+			"</span><span>Thresholder: ",
+			isVip(activeUser, companyId),
+			"</span></div>"
 		)
 	};
 	
@@ -317,10 +335,21 @@ async function getCompanyInfo() {
 }
 
 function isVip(user, companyId) {
+	if (user.shares[companyId] == undefined) {
+		return "";
+	}
 	if (parseInt(user.shares[companyId]) >= parseInt(activeCompany.keyShareholderThreshold)) {
 		return "&#10004;";
 	} else {
 		return "&#10008;";
+	}
+}
+  
+function sharesAmount(user, companyId) {
+	if (user.shares[companyId] == undefined) {
+		return "";
+	} else {
+		return user.shares[companyId];
 	}
 }
 
@@ -385,6 +414,5 @@ function getSortedCompanyList() {
 	} else {
 		sortedCompanyList = sortedCompanyList.sort((a, b) => a.sharePrice > b.sharePrice);
 	}
-	console.log(sortedCompanyList);
 	fillCompanyTable();
 }
