@@ -1,0 +1,806 @@
+@font-face{
+	font-family: Neon;
+	src: url("ANESA.ttf");
+}
+:root {
+  --main-color: rgb(60, 60, 60);
+  --input-color: #8e8e8e;
+}
+body {
+	width: 100vw;
+	height: 100vh;
+	background: var(--main-color);
+	font-family: Tahoma;
+}
+* {
+	padding: 0;
+	margin: 0;
+}
+.flexable {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.clickable {
+	cursor: pointer;
+}
+.header {
+	position: relative;
+	width: 100%;
+	height: 80px;
+	background: black;
+	justify-content: space-between;
+	z-index: 100;
+}
+.logoContainer {
+	width: 260px;
+	height: 80px;
+	justify-content: space-between;
+	margin-left: 20px;
+	color: white;
+}
+.logoIconContainer {
+	width: 80px;
+	height: 80px;
+	background: var(--main-color);
+	box-shadow: 0px 0px 3px 3px black;
+}
+.logo {
+	width: 60px;
+	height: 60px;
+	font-size: 20px;
+	background: url('Images/mtsLogo.png') no-repeat center center / cover;
+}
+.logoNameContainer {
+	width: 180px;
+	height: 50px;
+	background: var(--main-color);
+}
+.logoName {
+	transition: 0.5s;
+	width: 100px;
+	height: 30px;
+	border-left: 2px solid red;
+	justify-content: flex-start;
+	padding-left: 10px;
+	font-size: 25px;
+	color: red;
+}
+.logoContainer:hover > .logoNameContainer > .logoName {
+	width: 180px;
+}
+.registerContainer {
+	width: 250px;
+	height: 80px;
+	flex-direction: column;
+	justify-content: flex-end;
+	margin-right: 20px;
+	color: white;
+}
+.accountContainer {
+	position: relative;
+	display: none;
+	height: 70px;
+	width: 220px;
+	justify-content: space-around;
+	z-index: 105;
+}
+.accountName {
+	width: 140px;
+	height: 40px;
+	background: var(--main-color);
+	border: 1px solid red;
+}
+.menuButton {
+	height: 50px;
+	width: 50px;
+	background: var(--main-color);	
+}
+.menuButtonIcon {
+	height: 40px;
+	width: 40px;
+	background: url('Images/menu.png') no-repeat center center / cover;
+}
+.menuButtonIcon:hover {
+	background: url('Images/menuActive.png') no-repeat center center / cover;
+}
+.rButtonContainer {
+	height: 70px;
+	width: 220px;
+}
+.rDecorBlock {
+	width: 220px;
+	border-bottom: 8px solid var(--main-color);
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+}
+.button {
+	transition: 0.5s;
+	color: white;
+}
+.button:hover {
+	color: red;
+}
+.signInButton {
+	width: 100px;
+	height: 40px;
+	background: var(--main-color);
+	margin-right: 5px;
+	border: 1px solid red;
+}
+.signUpButton {
+	width: 100px;
+	height: 50px;
+	background: var(--main-color);
+	margin-left: 5px;
+}
+main {
+	width: 100%;
+	height: calc(100% - 140px);
+	color: white;
+}
+.mainContainer {
+	width: 100%;
+	height: 100%;
+	flex-direction: column;
+	justify-content: flex-start;
+	overflow: scroll;
+}
+.mainContainer::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+}
+.mainInfoContainer {
+	margin-top: 70px;
+	min-height: 80px;
+	min-width: 400px;
+	background: black;
+	margin-right: max(80vw - 400px, 0px);
+	justify-content: flex-start;
+	transform: rotate(5deg);
+}
+.mainInfo {
+	transition: 0.5s;
+	height: 70px;
+	width: 300px;
+	margin-left: 20px;
+	background: var(--main-color);
+	font-size: 30px;
+}
+.mainInfoContainer:hover > .mainInfo {
+	margin-left: 80px;
+}
+.mainReviewTabs {
+	position: relative;
+	margin-top: 70px;
+	min-width: 800px;
+	min-height: 50px;
+	background: black;
+	align-items: flex-start;
+	justify-content: flex-start;
+	font-size: 20px;
+}
+.reviewButton {
+	transition: 0.5s;
+	width: 160px;
+	height: 40px;
+	background: var(--main-color);
+	color: white;
+	margin-left: 10px;
+}
+.reviewButton:hover {
+	color: red;
+}
+#activeReviewButton {
+	margin-top: 10px;
+}
+.tableReloadButton {
+	transition: transform 0.5s;
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	right: 10px;
+	top: 10px;
+	background: url('Images/reload.png') no-repeat center center / 100%;
+}
+.tableReloadButton:hover {
+	transform: rotate(120deg);
+}
+.tableFilterContainer {
+	height: 50px;
+	width: 72%;
+	max-width: 480px;
+	background: black;
+	margin-bottom: 20px;
+}
+.tableFilterInputBlock {
+	width: 100%;
+	height: 100%;
+}
+.filterBlock {
+	min-height: 45px;
+	min-width: 45px;
+	border-bottom: 5px solid black;
+}
+.sortFilter {
+	border-left: 5px solid black;
+}
+.obtainFilter {
+	border-right: 5px solid black;
+}
+.filterBlockIcon {
+	transition: 0.3s;
+	height: 35px;
+	width: 35px;
+}
+.filterBlockIcon:hover {
+	height: 40px;
+	width: 40px;
+}
+.sortFilterIcon {
+	background: url('Images/letter.png') no-repeat center center / cover;
+}
+.obtainFilterIcon {
+	background: url('Images/envelope.png') no-repeat center center / cover;
+}
+.mainReviewTableContainer {
+	min-width: 800px;
+	min-height: calc(100vh - 280px);
+	background: black;
+	align-items: flex-start;
+}
+.mainReviewTable {
+	width: 780px;
+	height: calc(100% - 10px);
+	background: var(--main-color);
+	overflow: scroll;
+	color: white;
+}
+.mainReviewTable::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+}
+.mainReviewTable > * {
+	display: none;
+}
+#activeReviewBlock {
+	display: block;
+	color: white;
+}
+.sharesBlock {
+	width: 100%;
+	height: 100%;
+	border-spacing: 0px;
+}
+.sharesBlock tr th {
+	position: sticky;
+	top: 0px;
+	background: black;
+	color: white;
+	border: 2px solid black;
+	width: 260px;
+	height: 40px;
+	z-index: 10;
+}
+.sharesBlock tr td {
+	position: relative;
+	margin-left: 20px;
+	color: white;
+	padding-left: 10px;
+	width: 260px;
+	height: 40px;
+}
+.sharesBlock tr:not(:last-child) td {
+	border-bottom: 2px solid black;
+}
+.sharesBlock tr:hover td {
+	background: rgb(90, 90, 90);
+}
+.sharesBlock tr:hover td:first-child {
+	color: red;
+}
+.editButton {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	width: 26px;
+	height: 26px;
+	border: 1px solid black;
+	border-radius: 4px;
+	background: url('Images/editButtonIcon.png') var(--main-color) no-repeat center center / 80%;
+}
+.editButton:hover {
+	border: 1px solid white;
+	background: url('Images/editButtonIcon.png') rgb(90, 90, 90) no-repeat center center / 80%;
+}
+.transactionsConfirmBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 170;
+}
+.transactionCBG {
+	transition: 0.5s;
+	width: 100%;
+	height: 100%;
+	background: rgba(90, 60, 60, 0.8);
+}
+.transactionsConfirmForm:hover + .transactionCBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.transactionsConfirmForm {
+	display: flex;
+}
+.transactionsConfirmContainer {
+	position: absolute;
+	width: 250px;
+	height: 120px;
+	left: 50%;
+	top: 50%;
+	flex-direction: column;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.transactionsTransactionConfirnButton {
+	width: 90%;
+}
+.transactionButton  {
+	display: none;
+	height: 50px;
+	transition: 0.5s;
+	font-size: 25px;
+	color: white;
+}
+.transactionButton:hover {
+	color: red;
+}
+.lInputSharesDelta {
+	text-align: center;
+}
+.rInputSharesDelta {
+	text-align: center;
+}
+.transactionBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 150;
+}
+.transactionBG {
+	transition: 0.5s;
+	width: 100%;
+	height: 100%;
+	background: rgba(90, 60, 60, 0.8);
+}
+.sharesUpdateForm:hover + .transactionBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.sharesUpdateForm {
+	display: flex;
+}
+.sharesUpdateContainer {
+	position: absolute;
+	width: 450px;
+	height: 120px;
+	left: 50%;
+	top: 50%;
+	flex-direction: column;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.transactionCompanyName {
+	width: 450px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.transactionCompanyCost {
+	width: 550px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.transactionCompanyThres {
+	width: 550px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.transactionUserBalance {
+	width: 650px;
+	min-height: 80px;
+	background: var(--main-color);
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 20px;
+}
+.transactionButtonsBlock {
+	width: 90%;
+	min-height: 100px;
+	justify-content: space-between;
+	color: white;
+	font-size: 30px;
+}
+.tButton {
+	transition: 0.5s;
+	width: 40%;
+	min-height: 60px;
+	background: var(--main-color);
+	color: white;
+	font-size: 15px;
+}
+.tButton:hover {
+	color: red;
+}
+.registerBlock {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: none;
+	z-index: 10;
+}
+.registerBG {
+	transition: 0.5s;
+	width: 100%;
+	height: 100%;
+	background: rgba(90, 60, 60, 0.8);
+}
+.registerForm:hover ~ .registerBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.loginForm:hover ~ .registerBG {
+	background: rgba(60, 60, 60, 0.8);
+}
+.registerDataContainer {
+	position: absolute;
+	width: 500px;
+	
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--main-color);
+	filter: drop-shadow(0px 3px 3px black);
+}
+.rdc {
+	height: 425px;
+}
+.ldc {
+	height: 320px;
+}
+.registerForm {
+	display: none;
+}
+.loginForm {
+	display: none;
+}
+.registerNameBlock {
+	width: 100%;
+	height: 85px;
+}
+.registerName {
+	margin-left: -50px;
+	margin-top: 50px;
+	width: 600px;
+	height: 80px;
+	background: var(--main-color);
+	color: white;
+	font-size: 30px;
+}
+.registerFormContainer {
+	width: 100%;
+	flex-direction: column;
+}
+.rfc {
+	height: 270px;
+}
+.lfc {
+	height: 170px;
+}
+.registerInput {
+	width: 90%;
+	height: 50px;
+	border-bottom: 2px solid black;
+}
+.input {
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	color: white;
+	font-size: 20px;
+	outline: none;
+	border: 0px solid black;
+}
+.input::-webkit-input-placeholder {
+	transition: 0.5s;
+    color: var(--input-color);
+ }
+.registerToggle {
+	width: 90%;
+	height: 50px;
+	border-bottom: 2px solid black;
+}
+.rToggleText {
+	height: 50px;
+	color: white;
+	font-size: 20px;
+	float: left;
+}
+.toggle {
+	width: 50px;
+	height: 50px;
+	float: left;
+	margin: 0px 10px;
+}
+input {
+	font-family: Tahoma;
+}
+.submitButtonContainer {
+	position: absolute;
+	bottom: -60px;
+	width: 100%;
+	height: 50px;
+}
+.submitButton {
+	width: 200px;
+	height: 40px;
+	background: var(--main-color);
+}
+.submit {
+	color: white;
+	font-size: 30px;
+}
+.submit:hover {
+	color: red;
+}
+
+
+.footer {
+	position: absolute;
+	width: 100%;
+	height: 60px;
+	bottom: 0;
+	background: black;
+	border-top: 2px solid red;
+	justify-content: flex-end;
+	z-index: 100;
+}
+.contactsContainer {
+	height: 40px;
+	width: 280px;
+	margin-right: 50px;
+	background: var(--main-color);
+	justify-content: space-around;
+}
+.contactsText {
+	width: 110px;
+	height: 30px;
+	border-left: 2px solid red;
+	font-size: 20px;
+	color: red;
+}
+.contactsTextBlock {
+	transition: 0.5s;
+	margin-left: 0;
+}
+.contactsText:hover > .contactsTextBlock{
+	margin-left: 30px;
+}
+.contacts {
+	width: 120px;
+	height: 50px;
+	background: var(--main-color);
+	justify-content: space-around;
+}
+.contactsBlock {
+	transition: 0.5s;
+	width: 40px;
+	height: 40px;	
+	border: 2px solid transparent;
+}
+.contactsBlock:hover {
+	border: 2px solid red;
+}
+.contactsBlock > a > div {
+	width: 100%;
+	height: 100%;
+}
+.vkIcon {
+	background: url('Images/vkIcon.png') no-repeat center center / 120%;
+}
+.tgIcon {
+	background: url('Images/tgIcon.png') no-repeat center center / 120%;
+}
+.accountMenuContainer {
+	display: none;
+	transition: 0.3s;
+	position: fixed;
+	color: white;
+	right: -300px;
+	top: 0;
+	width: 280px;
+	height: calc(100vh - 10px);
+	border: 5px solid black;
+	flex-direction: column;
+}
+.accountMenuTopBlock {
+	height: 65px;
+	width: 100%;
+	background: rgba(255, 0, 0, 0.2);
+	pointer-events: none;
+}
+.accountMenuMidBlock {
+	width: 100%;
+	height: calc(100% - 120px);
+	background: var(--main-color);
+	flex-direction: column;
+	justify-content: flex-start;
+}
+.accountMenuBotBlock {
+	width: 100%;
+	height: 60px;
+	background: var(--main-color);
+}
+.infoBlock {
+	position: relative;
+	margin-top: 5px;
+	font-size: 20px;
+	width: 240px;
+	height: 60px;
+	flex-direction: column;
+	justify-content: space-around;
+	border-bottom: 4px solid black;
+}
+.infoBlock > span:first-child {
+	font-size: 25px;
+	align-self: flex-start;
+}
+.infoBlock > span:last-child {
+	align-self: flex-end;
+}
+.menuAccountEnd {
+	margin-bottom: 10px;
+}
+.menuAccountButton {
+	transition: 0.5s;
+	font-size: 16px;
+	margin-top: 5px;
+	border: 2px solid black;
+	width: 270px;
+	height: 40px;
+}
+.menuAccountButton:hover {
+	color: red;
+}
+.deleteAccountButton {
+	position: absolute;
+	bottom: 80px;
+}
+.transactionsLogBlock {
+	width: 100%;
+	height: 100%;
+	flex-direction: column;
+}
+.transactionsLogArticleContainer {
+	width: 100%;
+	height: 50px;
+	justify-content: flex-start;
+}
+.transactionsLogArticle {
+	width: 420px;
+	font-size: 30px;
+	height: 60px;
+	margin-left: 20px;
+}
+.transactionsLogHistory {
+	flex-direction: column;
+}
+.transactionLogBlock {
+	width: 90%;
+	height: 30px;
+	border-bottom: 1px solid black;
+	justify-content: flex-start;
+}
+
+.accountDataContainer {
+	display: none;
+	top: 0;
+	left: 0;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: rgba(255, 0, 0, 0.2);
+	z-index: 200;
+}
+.accountDataCloseButton {
+	position: fixed;
+	right: 50px;
+	top: 50px;
+	height: 40px;
+	width: 40px;
+}
+.accountDataCloseIcon {
+	transition: 0.3s;
+	width: 30px;
+	height: 30px;
+	background: url('Images/closeIcon.png') no-repeat center center / cover;
+}
+.accountDataCloseButton:hover > .accountDataCloseIcon {
+	width: 40px;
+	height: 40px;
+}
+.accountDataBlock {
+	position: relative;
+	width: calc(100% - 80px);
+	height: calc(100% - 80px);
+	background: var(--main-color);
+	border: 2px solid black;
+	flex-direction: column;
+	color: white;
+	font-size: 24px;
+	overflow: scroll;
+}
+.accountDataBlock::-webkit-scrollbar {
+	width: 0px;
+	display: none;
+}
+.personalDataBlock {
+	padding: 10px;
+	width: calc(100% - 200px);
+	margin-left: 100px;
+	border: 5px solid black;
+	min-height: calc(100% - 30px);
+}
+.personalDataRaw {
+	border-left: 2px solid black;
+	border-bottom: 2px solid black;
+	margin: 5px;
+}
+.personalDataRaw:hover {
+	color: red;
+}
+.personalDataRaw > span {
+	width: calc(100% - 20px);
+}
+.personalDataLevel1 {
+	height: 40px;
+	margin-left: 5px;
+}
+.personalDataLevel2 {
+	height: 30px;
+	margin-left: 35px;
+	padding: 0px 10px;
+	justify-content: space-between;
+}
+.personalDataLevel2 span {
+	margin: 5px;
+}
+.correctLog {
+	color: lightgreen;
+}
+.errorLog {
+	color: red;
+}
+
+@media screen and (max-width: 800px) {
+	.mainReviewTabs{
+		min-width: 100%;
+	}
+	.mainReviewTableContainer {
+		min-width: 100%;
+	}
+	.mainReviewTable {
+		width: calc(100% - 20px);
+	}
+}
