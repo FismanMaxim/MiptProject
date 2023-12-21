@@ -13,7 +13,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import spark.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,9 +24,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static spark.Spark.*;
 
 class UserControllerTest {
-    private Service service;
     private static ObjectMapper mapper;
 
     @BeforeAll
@@ -37,22 +36,22 @@ class UserControllerTest {
 
     @BeforeEach
     void initService() {
-        service = Service.ignite();
         UserService userService = new UserService(new InMemoryUserRepository());
 
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
         ControllersManager manager = new ControllersManager(List.of(
-                new UserController(service, userService, companyService, mapper)
+                new UserController(/*service, */userService, companyService, mapper)
         ));
 
         manager.start();
-        service.awaitInitialization();
+        init();
+        awaitInitialization();
     }
 
     @AfterEach
     void stopService() {
-        service.stop();
-        service.awaitStop();
+        stop();
+        awaitStop();
     }
 
     @Test
@@ -67,7 +66,7 @@ class UserControllerTest {
                                                         {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -77,7 +76,7 @@ class UserControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -100,7 +99,7 @@ class UserControllerTest {
                                                         {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -120,7 +119,7 @@ class UserControllerTest {
                                                         {"deltaMoney": 1000 }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + userId))
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(port()) + userId))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -132,7 +131,7 @@ class UserControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + userId))
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(port()) + userId))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -157,7 +156,7 @@ class UserControllerTest {
                                                         "{\"wrongKey\": \"wrongValue\", \"wrongKey\": -1}"
                                                 )
                                         )
-                                        .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                        .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                         .build(),
                                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                         );
@@ -182,7 +181,7 @@ class UserControllerTest {
                                                         {"name": "newUserName"}"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr/0".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -202,7 +201,7 @@ class UserControllerTest {
                                                         {"name": "testUsername", "password": "pass" }"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -221,7 +220,7 @@ class UserControllerTest {
                                                 "{\"name\": \"testUsername\", \"password\": \"pass\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/usr/auth".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/usr/auth".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -236,7 +235,7 @@ class UserControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(service.port()) + idResponse.id()))
+                                .uri(URI.create("http://localhost:%d/api/usr/".formatted(port()) + idResponse.id()))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );

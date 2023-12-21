@@ -344,6 +344,7 @@ function isVip(user, companyId) {
 		return "&#10008;";
 	}
 }
+  
 function sharesAmount(user, companyId) {
 	if (user.shares[companyId] == undefined) {
 		return "";

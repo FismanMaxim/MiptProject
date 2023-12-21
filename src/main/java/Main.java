@@ -1,6 +1,8 @@
 import EndpointsControllers.EntitiesControllers.CompanyController;
 import EndpointsControllers.ControllersManager;
+import EndpointsControllers.EntitiesControllers.CompanyController;
 import EndpointsControllers.EntitiesControllers.UserController;
+import EndpointsControllers.TemplateFactory;
 import EndpointsControllers.WebsiteController;
 import EntitiesServices.CompanyService;
 import EntitiesServices.UserService;
@@ -19,36 +21,37 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
-public class Main {
+import static spark.Spark.*;
 
+public class Main {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static void main(String[] args) {
-        try {
-            Service service = Service.ignite();
+        staticFileLocation("/public");
+        init();
 
+        try {
             Path path = Paths.get("src/main/resources/login");
             BufferedReader reader = Files.newBufferedReader(path);
-            Database database =
-                    new Database(DriverManager.getConnection(reader.readLine().trim(),
-                            reader.readLine().trim(),
-                            reader.readLine().trim()));
-            CompanyService companyService =
-                    new CompanyService(database.company);
+            Database database = new Database(DriverManager.getConnection(reader.readLine().trim(),
+                    reader.readLine().trim(),
+                    reader.readLine().trim()));
 
+            CompanyService companyService = new CompanyService(database.company);
             UserService userService = new UserService(database.user);
+
             ControllersManager manager = new ControllersManager(List.of(
-                    new CompanyController(service, companyService, mapper),
-                    new UserController(service, userService, companyService,
-                            mapper),
-                    new WebsiteController(service, mapper)
+                    new WebsiteController(TemplateFactory.freeMarkerEngine(), mapper),
+                    new CompanyController(companyService, mapper),
+                    new UserController(userService, companyService, mapper)
             ));
 
             manager.start();
-            service.awaitInitialization();
-            service.awaitStop();
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
+
+        awaitInitialization();
+        awaitStop();
     }
 }

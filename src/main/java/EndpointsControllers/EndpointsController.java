@@ -5,14 +5,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import spark.Response;
-import spark.Service;
 
 public abstract class EndpointsController {
-    protected final Service service;
+    //protected final Service service;
     protected final ObjectMapper objectMapper;
 
-    public EndpointsController(Service service, ObjectMapper objectMapper) {
-        this.service = service;
+    public EndpointsController(/*Service service,*/ ObjectMapper objectMapper) {
+        //this.service = service;
         this.objectMapper = objectMapper;
     }
 

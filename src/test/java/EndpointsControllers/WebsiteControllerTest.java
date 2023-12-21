@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import spark.Service;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,8 +13,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static spark.Spark.*;
+
 class WebsiteControllerTest {
-    private Service service;
     private static ObjectMapper mapper;
 
     @BeforeAll
@@ -25,18 +25,17 @@ class WebsiteControllerTest {
 
     @BeforeEach
     void initService() {
-        service = Service.ignite();
-
-        ControllersManager manager = new ControllersManager(List.of(new WebsiteController(service, mapper)));
+        ControllersManager manager = new ControllersManager(List.of(new WebsiteController(/*service,*/ TemplateFactory.freeMarkerEngine(), mapper)));
 
         manager.start();
-        service.awaitInitialization();
+        init();
+        awaitInitialization();
     }
 
     @AfterEach
     void stopService() {
-        service.stop();
-        service.awaitStop();
+        stop();
+        awaitStop();
     }
 
     @Test
@@ -46,7 +45,7 @@ class WebsiteControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );

@@ -10,8 +10,10 @@ import Responses.EntityIdResponse;
 import Responses.FindCompanyResponse;
 import Responses.GetAllCompaniesResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
-import spark.Service;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,10 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static spark.Spark.*;
 
 class CompanyControllerTest {
-    private Service service;
     private static ObjectMapper mapper;
 
     @BeforeAll
@@ -35,23 +37,23 @@ class CompanyControllerTest {
 
     @BeforeEach
     void initService() {
-        service = Service.ignite();
         CompanyService companyService = new CompanyService(new InMemoryCompanyRepository());
 
         UserService userService = new UserService(new InMemoryUserRepository());
         ControllersManager manager = new ControllersManager(List.of(
-                new CompanyController(service, companyService, mapper),
-                new UserController(service, userService, companyService, mapper)
+                new CompanyController(companyService, mapper),
+                new UserController(userService, companyService, mapper)
         ));
 
         manager.start();
-        service.awaitInitialization();
+        init();
+        awaitInitialization();
     }
 
     @AfterEach
     void stopService() {
-        service.stop();
-        service.awaitStop();
+        stop();
+        awaitStop();
     }
 
     @Test
@@ -61,7 +63,7 @@ class CompanyControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/company/0".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company/0".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -81,7 +83,7 @@ class CompanyControllerTest {
                                                         {"name": "newCompanyName", "money": 2000000}"""
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/0".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), -1)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -100,7 +102,7 @@ class CompanyControllerTest {
                                                 "{\"name\": \"company1\", \"password\": \"password\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -120,7 +122,7 @@ class CompanyControllerTest {
                                                         "\"money\": 100, \"sharePrice\": 100}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id1))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), id1)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -136,7 +138,7 @@ class CompanyControllerTest {
                                                 "{\"name\": \"company2\", \"password\": \"password2\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -156,7 +158,7 @@ class CompanyControllerTest {
                                                         "\"money\": 100, \"sharePrice\": 100}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id2))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), id2)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -168,7 +170,7 @@ class CompanyControllerTest {
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -193,7 +195,7 @@ class CompanyControllerTest {
                                                         "{\"wrongKey\": \"wrongValue\", \"wrongKey\": -1}"
                                                 )
                                         )
-                                        .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                        .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                         .build(),
                                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                         );
@@ -217,7 +219,7 @@ class CompanyControllerTest {
                                                 "{\"name\": \"testName\", \"password\": \"pass\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -237,7 +239,7 @@ class CompanyControllerTest {
                                                         "\"money\": 1000000, \"sharePrice\": 100}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + id))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), id)))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -253,7 +255,7 @@ class CompanyControllerTest {
                                                 "{\"name\": \"testName\", \"password\": \"pass\"}"
                                         )
                                 )
-                                .uri(URI.create("http://localhost:%d/api/company/auth".formatted(service.port())))
+                                .uri(URI.create("http://localhost:%d/api/company/auth".formatted(port())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
@@ -261,14 +263,14 @@ class CompanyControllerTest {
         EntityIdResponse idResponse = mapper.readValue(response.body(), EntityIdResponse.class);
 
         assertEquals(200, response.statusCode());
-        assertEquals(idResponse.id(), 0);
+        assertEquals(id, idResponse.id());
 
         // Get company be retrieved id
         response = HttpClient.newHttpClient()
                 .send(
                         HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:%d/api/company/".formatted(service.port()) + idResponse.id()))
+                                .uri(URI.create("http://localhost:%d/api/company/%d".formatted(port(), idResponse.id())))
                                 .build(),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );

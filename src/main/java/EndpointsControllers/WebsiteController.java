@@ -4,18 +4,24 @@ import EndpointsControllers.EntitiesControllers.CompanyController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
-import spark.Service;
+import spark.template.freemarker.FreeMarkerEngine;
 
-import java.io.*;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
+
+import static spark.Spark.get;
 
 public class WebsiteController extends EndpointsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
+    private final FreeMarkerEngine freeMarkerEngine;
 
-    public WebsiteController(Service service, ObjectMapper objectMapper) {
-        super(service, objectMapper);
+    public WebsiteController(FreeMarkerEngine freeMarkerEngine, ObjectMapper objectMapper) {
+        super(objectMapper);
+
+        this.freeMarkerEngine = freeMarkerEngine;
     }
 
     @Override
@@ -24,40 +30,11 @@ public class WebsiteController extends EndpointsController {
     }
 
     private void getMainPageEndpoint() {
-        service.get("/", (Request request, Response response) -> {
-            response.type("application/html");
+        /*service.*/get("/", (Request request, Response response) -> {
+            response.type("text/html; charset=utf-8");
 
-            try {
-                String indexHtml;
-
-                InputStream inputStream = getClass().getResourceAsStream("/index.html");
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)))) {
-                    final StringBuilder sb = new StringBuilder();
-                    String line = br.readLine();
-
-                    while (line != null) {
-                        sb.append(line);
-                        sb.append(System.lineSeparator());
-                        line = br.readLine();
-                    }
-
-                    indexHtml = sb.toString();
-                }
-
-                return indexHtml;
-            } catch (NullPointerException e) {
-                return InformOfClientError(LOGGER,
-                        "File index.html not found",
-                        response,
-                        e,
-                        404);
-            } catch (IOException e) {
-                return InformOfClientError(LOGGER,
-                        "Failed to read index.html",
-                        response,
-                        e,
-                        400);
-            }
+            Map<String, Object> model = new HashMap<>();
+            return freeMarkerEngine.render(new ModelAndView(model, "index.html"));
         });
     }
 }

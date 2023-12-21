@@ -18,14 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
-import spark.Service;
+
+import static spark.Spark.*;
 
 public class UserController extends EntityController<UserService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final CompanyService companyService;
 
-    public UserController(Service service, UserService userService, CompanyService companyService, ObjectMapper objectMapper) {
-        super(service, userService, objectMapper);
+    public UserController(/*Service service,*/ UserService userService, CompanyService companyService, ObjectMapper objectMapper) {
+        super(/*service, */userService, objectMapper);
 
         this.companyService = companyService;
     }
@@ -41,7 +42,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void createUserEndpoint() {
-        service.post("/api/usr", (Request request, Response response) -> {
+        /*service.*/post("/api/usr", (Request request, Response response) -> {
             response.type("application.json");
 
             CreateEntityRequest createRequest;
@@ -70,7 +71,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void getUserByIdEndpoint() {
-        service.get("/api/usr/:userId", (Request request, Response response) -> {
+        /*service.*/get("/api/usr/:userId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
@@ -99,7 +100,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void getUserIdByNamePasswordEndpoint() {
-        service.post("/api/usr/auth", (Request request, Response response) -> {
+        /*service.*/post("/api/usr/auth", (Request request, Response response) -> {
             response.type("application.json");
 
             AuthenticationRequest authenticateRequest;
@@ -128,7 +129,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void updateUserMoneyNameEndpoint() {
-        service.put("/api/usr/:userId", (Request request, Response response) -> {
+        /*service.*/put("/api/usr/:userId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
@@ -199,7 +200,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void updateUserSharesEndpoint() {
-        service.put("/api/usr/:userId/shares", (Request request, Response response) -> {
+        /*service.*/put("/api/usr/:userId/shares", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
@@ -300,7 +301,7 @@ public class UserController extends EntityController<UserService> {
     }
 
     void deleteUserEndpoint() {
-        service.delete("/api/usr/:userId", (Request request, Response response) -> {
+        /*service.*/delete("/api/usr/:userId", (Request request, Response response) -> {
             response.type("application.json");
 
             long id;
