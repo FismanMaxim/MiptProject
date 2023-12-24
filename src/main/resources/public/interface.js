@@ -11,7 +11,7 @@ function loginForm() {
 	document.querySelector(".loginForm").style.display = "block";
 	document.querySelector(".registerForm").style.display = "none";
 	
-	if (isFormOpened != 1) {
+	if (isFormOpened !== 1) {
 		isFormOpened = 1;
 		requestAnimationFrame(openForm);
 	} else {
@@ -23,7 +23,7 @@ function registerForm() {
 	document.querySelector(".registerForm").style.display = "block";
 	document.querySelector(".loginForm").style.display = "none";
 		
-	if (isFormOpened != 2) {
+	if (isFormOpened !== 2) {
 		isFormOpened = 2;
 		requestAnimationFrame(openForm);
 	} else {
@@ -45,7 +45,7 @@ function closeForm() {
 }
 
 function editShares(id, name, cost, threshold) {
-	if (activeId.id >= 0 && isActiveCompany.flag == false) {
+	if (activeId.id >= 0 && isActiveCompany.flag === false) {
 		chosenCompany = new ChosenCompany(id, name);
 		
 		document.querySelector(".companyName").innerHTML = "Issuer: " + name;
@@ -128,7 +128,7 @@ let sortedCompanyList;
 function fillCompanyTable() {
 	let table = document.querySelector(".sharesBlock");
 	
-	if (activeId.id >= 0 && isActiveCompany.flag == false) {
+	if (activeId.id >= 0 && isActiveCompany.flag === false) {
 		table.innerHTML = "<tr><th>Issuer</th><th>Your share</th><th>Key shareholder</th><th>Share price</th><th>Available shares</th></tr>";
 	} else {
 		table.innerHTML = "<tr><th>Issuer</th><th>Share price</th><th>Available shares</th>";
@@ -143,11 +143,11 @@ function fillCompanyTable() {
 				company.companyName,
 				"</td><td>"
 			);
-			if (activeId.id >= 0 && isActiveCompany.flag == false) {
+			if (activeId.id >= 0 && isActiveCompany.flag === false) {
 				html.push(
 					sharesAmount(activeUser, parseInt(company.id)),
 					"</td><td>",
-					isVip(activeUser, company.id),
+					isVip(activeUser, parseInt(company.id)),
 					"</td><td>",
 					company.sharePrice,
 					"</td><td>",
@@ -175,7 +175,7 @@ function fillCompanyTable() {
 			table.appendChild(companyBlock);
 		});
 	} catch(error) {
-		console.error(error);
+		console.log(error);
 	}
 }
 
@@ -263,10 +263,10 @@ function getUserInfo() {
 			"</span><span>Shares: ",
 			activeUser.shares[parseInt(companyId)],
 			"</span><span>Thresholder: ",
-			isVip(activeUser, companyId),
+			isVip(activeUser, parseInt(companyId)),
 			"</span></div>"
 		)
-	};
+	}
 	
 	document.querySelector(".personalDataBlock").innerHTML = html.join("");
 }
@@ -307,38 +307,38 @@ async function getCompanyInfo() {
 		"<div class='personalDataRaw personalDataLevel1 flexable'><span>Users: </span></div>",
 	);
 	
-	
-	for (let userId in activeCompany.users) {
-		let user = await fetch(url + '/usr/' + userId + '', {
-			method: 'GET', 
+	for (let user of activeCompany.users) {
+		let userUpdated = await fetch(url + '/usr/' + user.id + '', {
+			method: 'GET',
 			headers: {
 				'Accept' : 'application/json',
 				'Content-Type': 'application/json'
 			},
 		})
 			.then(response => response.json());
-		
-		user = user.user;
+
+		userUpdated = userUpdated.user;
 		
 		html.push(
 			"<div class='personalDataRaw personalDataLevel2 flexable'><span>UserID: ",
-			user.id,
+			userUpdated.id,
 			"</span><span>Shares amount: ",
-			user.shares[parseInt(activeCompany.id)],
+			userUpdated.shares[parseInt(activeCompany.id)],
 			"</span><span>VIPAccount: ",
-			isVip(user, activeCompany.id),
+			isVip(userUpdated, parseInt(activeCompany.id)),
 			"</span></div>",
 		)
-	};
+	}
 	
 	document.querySelector(".personalDataBlock").innerHTML = html.join("");
 }
 
 function isVip(user, companyId) {
-	if (user.shares[companyId] == undefined) {
+	if (user.shares[companyId] === undefined) {
 		return "";
 	}
-	if (parseInt(user.shares[companyId]) >= parseInt(activeCompany.keyShareholderThreshold)) {
+
+	if (parseInt(user.shares[companyId]) >= parseInt(companyList.get(companyId).keyShareholderThreshold)) {
 		return "&#10004;";
 	} else {
 		return "&#10008;";
@@ -346,7 +346,7 @@ function isVip(user, companyId) {
 }
   
 function sharesAmount(user, companyId) {
-	if (user.shares[companyId] == undefined) {
+	if (user.shares[companyId] === undefined) {
 		return "";
 	} else {
 		return user.shares[companyId];
@@ -356,12 +356,12 @@ function sharesAmount(user, companyId) {
 let isSortCommon = 0;
 function setSortingFilter() {
 	isSortCommon = (isSortCommon + 1) % 3;
-	if (isSortCommon == 0) {
-		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/letter.png') no-repeat center center / cover";
-	} else if (isSortCommon == 1) {
-		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/graphDown.png') no-repeat center center / cover";
+	if (isSortCommon === 0) {
+		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/letter.png') no-repeat center center / cover";
+	} else if (isSortCommon === 1) {
+		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/graphDown.png') no-repeat center center / cover";
 	} else {
-		document.querySelector(".sortFilterIcon").style.background = "url('Objects/Images/graphUp.png') no-repeat center center / cover";
+		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/graphUp.png') no-repeat center center / cover";
 	}
 	getSortedCompanyList();
 }
@@ -369,12 +369,12 @@ let isObtain = 1;
 function setObtainingFilter() {
 	if (activeId.id >= 0){
 		isObtain = (isObtain + 1) % 3;
-		if (isObtain == 1) {
-			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelope.png') no-repeat center center / cover";
-		} else if (isObtain == 2) {
-			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelopeT.png') no-repeat center center / cover";
+		if (isObtain === 1) {
+			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelope.png') no-repeat center center / cover";
+		} else if (isObtain === 2) {
+			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelopeT.png') no-repeat center center / cover";
 		} else {
-			document.querySelector(".obtainFilterIcon").style.background = "url('Objects/Images/envelopeF.png') no-repeat center center / cover";
+			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelopeF.png') no-repeat center center / cover";
 		}
 		getSortedCompanyList();
 	}
@@ -392,11 +392,11 @@ function getSortedCompanyList() {
 		let fl1 = true;
 		let fl2 = true;
 		
-		if ((filter != "" && !(company.companyName.includes(filter)))) {
+		if ((filter !== "" && !(company.companyName.includes(filter)))) {
 			fl1 = false;
 		}
 		
-		if (isObtain != 1 && activeId.id >= 0 && ((isObtain > 0) ^ (activeUser.shares[parseInt(company.id)] > 0))){
+		if (isObtain !== 1 && activeId.id >= 0 && ((isObtain > 0) ^ (activeUser.shares[parseInt(company.id)] > 0))){
 			fl2 = false;
 		}
 		
@@ -407,9 +407,9 @@ function getSortedCompanyList() {
 	
 	
 	
-	if (isSortCommon == 0) {
+	if (isSortCommon === 0) {
 		sortedCompanyList = sortedCompanyList.sort((a, b) => a.companyName > b.companyName);
-	} else if (isSortCommon == 1) {
+	} else if (isSortCommon === 1) {
 		sortedCompanyList = sortedCompanyList.sort((a, b) => b.sharePrice > a.sharePrice);
 	} else {
 		sortedCompanyList = sortedCompanyList.sort((a, b) => a.sharePrice > b.sharePrice);
