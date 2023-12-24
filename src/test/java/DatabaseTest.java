@@ -39,23 +39,24 @@ public class DatabaseTest {
             database.connection.prepareStatement("create extension hstore;").execute();
         } catch (SQLException e) {
         }
-        database.connection.prepareStatement("CREATE TABLE users (\n" +
-                "                       id SERIAL PRIMARY KEY,\n" +
-                "                       name VARCHAR(255),\n" +
-                "                       money INT,\n" +
-                "                       shares hstore,\n" +
-                "                       password VARCHAR(255)\n" +
-                ");CREATE TABLE companies (\n" +
-                "                           id SERIAL PRIMARY KEY,\n" +
-                "                           users INT[],\n" +
-                "                           name VARCHAR(255) NOT NULL,\n" +
-                "                           key_shareholder_threshold INT NOT NULL,\n" +
-                "                           vacant_shares INT NOT NULL,\n" +
-                "                           total_shares INT NOT NULL,\n" +
-                "                           money INT NOT NULL,\n" +
-                "                           share_price INT NOT NULL,\n" +
-                "                           password VARCHAR(255)\n" +
-                ");").execute();
+        database.connection.prepareStatement("""
+                CREATE TABLE users (
+                                       id SERIAL PRIMARY KEY,
+                                       name VARCHAR(255),
+                                       money INT,
+                                       shares hstore,
+                                       password VARCHAR(255)
+                );CREATE TABLE companies (
+                                           id SERIAL PRIMARY KEY,
+                                           users INT[],
+                                           name VARCHAR(255) NOT NULL,
+                                           key_shareholder_threshold INT NOT NULL,
+                                           vacant_shares INT NOT NULL,
+                                           total_shares INT NOT NULL,
+                                           money INT NOT NULL,
+                                           share_price INT NOT NULL,
+                                           password VARCHAR(255)
+                );""").execute();
     }
 
     @AfterAll
