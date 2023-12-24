@@ -64,6 +64,7 @@ public class Database {
                     if (resultSet.next()) {
                         return resultSet.getInt("id")+1;
                     }
+                    return 0;
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -297,6 +298,7 @@ public class Database {
                     if (resultSet.next()) {
                         return resultSet.getInt("id")+1;
                     }
+                    return 0;
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
