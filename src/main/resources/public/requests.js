@@ -5,8 +5,7 @@ let activeId = -1;
 let isActiveCompany = false;
 
 let companyList = new Map();
-const url = window.location.host + ':4567/api';
-console.log(url);
+const url = window.location.host + '/api';
 
 function getAccountById() {
 	if (isActiveCompany.flag) {
