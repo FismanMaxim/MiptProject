@@ -14,6 +14,8 @@ import spark.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +28,8 @@ import static spark.Spark.*;
 public class Main {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
+        System.out.println(InetAddress.getLocalHost().getHostAddress());
         staticFileLocation("/public");
         init();
 
