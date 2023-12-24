@@ -338,13 +338,13 @@ function isVip(user, companyId) {
 	if (user.shares[companyId] == undefined) {
 		return "";
 	}
-	if (parseInt(user.shares[companyId]) >= parseInt(activeCompany.keyShareholderThreshold)) {
+	console.log(user, user.shares, companyList);
+	if (parseInt(user.shares[companyId]) >= parseInt(companyList.get(parseInt(companyId)).keyShareholderThreshold)) {
 		return "&#10004;";
 	} else {
 		return "&#10008;";
 	}
 }
-  
 function sharesAmount(user, companyId) {
 	if (user.shares[companyId] == undefined) {
 		return "";

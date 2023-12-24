@@ -95,7 +95,7 @@ function authorization() {
 			.then(response => response.json())
 			.then(data => setId(data))
 			.then(setIsCompany(true))
-			.catch(error => console.error(error));
+			.catch(error => console.log(error));
 			
 	} else {
 		const data = new URLSearchParams();
@@ -122,7 +122,7 @@ function authorization() {
 			.then(response => response.json())
 			.then(data => setId(data))
 			.then(setIsCompany(false))
-			.catch(error => console.error(error));
+			.catch(error => console.log(error));
 	}
 }
 
@@ -163,7 +163,7 @@ function registration() {
 			.then(response => response.json())
 			.then(data => setId(data))
 			.then(setIsCompany(true))
-			.catch(error => console.error(error));
+			.catch(error => console.log(error));
 		
 	} else {
 		const data = new URLSearchParams();
@@ -188,7 +188,7 @@ function registration() {
 			.then(response => response.json())
 			.then(data => setId(data))
 			.then(setIsCompany(false))
-			.catch(error => console.error(error));
+			.catch(error => console.log(error));
 	}
 }
 
@@ -270,9 +270,10 @@ async function buyShares() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Buy " + delta + " shares of " + chosenCompany.companyName, "Buy " + chosenCompany.companyName + " shares transaction failed"))
-		.catch(error => createTransactionLog(error));
-		
+		.then(response => createTransactionLog(response.status, delta, "Buy " + delta + " shares of " + chosenCompany.companyName, "Buy " + chosenCompany.companyName + " shares transaction failed"))
+		.catch(error => console.log(error));
+	
+	getCompanies();
 	getAccountById();
 	removeTransactionForm();
 	
@@ -312,9 +313,10 @@ async function selShares() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Sel " + (-delta) + " shares of " + chosenCompany.companyName, "Sel " + chosenCompany.companyName + " shares transaction failed"))
-		.catch(error => createTransactionLog(error));
-		
+		.then(response => createTransactionLog(response.status, delta, "Sell " + (-delta) + " shares of " + chosenCompany.companyName, "Sell " + chosenCompany.companyName + " shares transaction failed", error))
+		.catch(error => console.log(error));
+	
+	getCompanies();
 	getAccountById();
 	removeTransactionForm();
 	
@@ -351,8 +353,8 @@ async function refillBalanceUser() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 
@@ -389,8 +391,8 @@ async function changeUserName() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(newName, "Name have been changed on " + newName, "Name change transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, newName, "Name have been changed on " + newName, "Name change transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 	
@@ -427,8 +429,8 @@ async function refillBalanceCompany() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, delta, "Top up balance for " + delta + " toncoins", "Top up balance transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 	
@@ -465,8 +467,8 @@ async function changeCompanyName() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(newName, "Name have been changed on " + newName, "Name change transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, newName, "Name have been changed on " + newName, "Name change transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 	
@@ -503,8 +505,8 @@ async function changeDeltaShares() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(delta, "Change amount of shares on " + delta, "Change amount of shares transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, delta, "Change amount of shares on " + delta, "Change amount of shares transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 	
@@ -541,8 +543,8 @@ async function changeSharesCost() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(price, "Change cost of shares on " + price, "Change cost of shares transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, price, "Change cost of shares on " + price, "Change cost of shares transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 
@@ -579,8 +581,8 @@ async function changeThreshold() {
 		},
 		body: body
 	})
-		.then(createTransactionLog(threshold, "Change threshold on " + threshold, "Change threshold transaction failed"))
-		.catch(error => createTransactionLog(error));
+		.then(response => createTransactionLog(response.status, threshold, "Change threshold on " + threshold, "Change threshold transaction failed"))
+		.catch(error => console.log(error));
 		
 	getAccountById();
 	
@@ -629,10 +631,10 @@ function deleteCompany() {
 	window.location.reload();
 }
 
-function createTransactionLog(value, text, textError) {
+function createTransactionLog(status, value, text, textError) {
 	let el = document.createElement("div");
 	el.className = "transactionLogBlock flexable";
-	if (value == null || value == undefined || Number.isNaN(value)) {
+	if (value == null || value == undefined || Number.isNaN(value) || status == 400) {
 		el.innerHTML = "<span class='errorLog'>" + textError + "</span>";
 	} else {
 		el.innerHTML = "<span class='correctLog'>" + text + "</span>";
