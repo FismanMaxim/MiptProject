@@ -28,7 +28,7 @@ public class Database {
         }
     }
 
-    protected void finalize(){
+    protected void finalize() {
         if (connection != null) {
             dropConnection();
         }
@@ -53,11 +53,25 @@ public class Database {
     }
 
     public class InMemoryUser implements EntityRepository<User> {
-        private int id = 0;
 
         @Override
         public long generateId() {
-            return ++id;
+            String getAllUsersQuery = "SELECT MAX(users.id) as id FROM users";
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getAllUsersQuery);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("id")+1;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return -1;
         }
 
         @Override
@@ -276,7 +290,23 @@ public class Database {
 
         @Override
         public long generateId() {
-            return ++id;
+            String getAllUsersQuery = "SELECT MAX(companies.id) as id FROM " +
+                    "companies";
+            try {
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(getAllUsersQuery);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("id")+1;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return -1;
         }
 
         public List<Company> getAll() {
