@@ -1,10 +1,13 @@
 package EndpointsControllers.EntitiesControllers;
 
+import static spark.Spark.*;
+
 import CustomExceptions.CreateEntityException;
 import CustomExceptions.DeleteEntityException;
 import CustomExceptions.GetEntityException;
 import CustomExceptions.UpdateEntityException;
 import Entities.Company;
+import Entities.User;
 import EntitiesServices.CompanyService;
 import Requests.AuthenticationRequest;
 import Requests.CreateEntityRequest;
@@ -14,15 +17,13 @@ import Responses.GetAllCompaniesResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static spark.Spark.*;
 
 public class CompanyController extends EntityController<CompanyService> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
@@ -87,6 +88,8 @@ public class CompanyController extends EntityController<CompanyService> {
 
             try {
                 Company company = entityService.getById(id);
+                company = getCompanyWithoutUsersPasswords(company);
+
                 response.status(200);
                 return objectMapper.writeValueAsString(new FindCompanyResponse(company));
             } catch (GetEntityException e) {
@@ -128,25 +131,33 @@ public class CompanyController extends EntityController<CompanyService> {
         });
     }
 
+  private Company getCompanyWithoutUsersPasswords(Company company) {
+    List<User> users = new ArrayList<> (company.getCopyOfUsers());
+    users.replaceAll(user -> user.withPassword("-"));
+    return new Company(company.getId(),  company.getCompanyName(),  company.getTotalShares(),  company.getVacantShares(),
+            company.getKeyShareholderThreshold(), company.getMoney(),  company.getSharePrice(), new HashSet<>(users));
+  }
+
     private void getAllCompaniesEndpoint() {
-        /*service.*/get("/api/company", (Request request, Response response) -> {
-            response.type("application.json");
+    /*service.*/ get(
+        "/api/company",
+        (Request request, Response response) -> {
+          response.type("application.json");
 
-            try {
-                List<Company> companies = entityService.getAll();
-                List<FindCompanyResponse> listResponse = new ArrayList<>();
-                for (Company company : companies)
-                    listResponse.add(new FindCompanyResponse(company));
+          try {
+            List<Company> companies = entityService.getAll();
+            List<FindCompanyResponse> listResponse = new ArrayList<>();
+            for (Company company : companies) {
+              company = getCompanyWithoutUsersPasswords(company);
 
-                response.status(200);
-                return objectMapper.writeValueAsString(new GetAllCompaniesResponse(listResponse));
-            } catch (GetEntityException e) {
-                return InformOfClientError(LOGGER,
-                        "Failed to get all companies",
-                        response,
-                        e,
-                        404);
+              listResponse.add(new FindCompanyResponse(company));
             }
+
+            response.status(200);
+            return objectMapper.writeValueAsString(new GetAllCompaniesResponse(listResponse));
+          } catch (GetEntityException e) {
+            return InformOfClientError(LOGGER, "Failed to get all companies", response, e, 404);
+          }
         });
     }
 

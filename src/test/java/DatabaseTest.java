@@ -1,20 +1,19 @@
+import static org.junit.jupiter.api.Assertions.*;
+
 import Entities.Company;
 import Entities.User;
 import Requests.ShareDelta;
 import database.Database;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class DatabaseTest {
 
@@ -411,7 +410,7 @@ public class DatabaseTest {
     // endregion
 
     @Test
-    public void SaveUsersOfCompanyWithShares() {
+    public void saveUsersOfCompanyWithShares() {
         User user = new User(1, "userName", 0, "password");
         Company company = new Company(1, "companyName", 100, 0, 0, 0, "password");
 
