@@ -286,8 +286,6 @@ public class Database {
 
     public class InMemoryCompany implements EntityRepository<Company> {
 
-        private int id = 0;
-
         @Override
         public long generateId() {
             String getAllUsersQuery = "SELECT MAX(companies.id) as id FROM " +
