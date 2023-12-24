@@ -357,11 +357,11 @@ let isSortCommon = 0;
 function setSortingFilter() {
 	isSortCommon = (isSortCommon + 1) % 3;
 	if (isSortCommon === 0) {
-		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/letter.png') no-repeat center center / cover";
+		document.querySelector(".sortFilterIcon").style.background = "url('Images/letter.png') no-repeat center center / cover";
 	} else if (isSortCommon === 1) {
-		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/graphDown.png') no-repeat center center / cover";
+		document.querySelector(".sortFilterIcon").style.background = "url('Images/graphDown.png') no-repeat center center / cover";
 	} else {
-		document.querySelector(".sortFilterIcon").style.background = "url('public/Images/graphUp.png') no-repeat center center / cover";
+		document.querySelector(".sortFilterIcon").style.background = "url('Images/graphUp.png') no-repeat center center / cover";
 	}
 	getSortedCompanyList();
 }
@@ -370,11 +370,11 @@ function setObtainingFilter() {
 	if (activeId.id >= 0){
 		isObtain = (isObtain + 1) % 3;
 		if (isObtain === 1) {
-			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelope.png') no-repeat center center / cover";
+			document.querySelector(".obtainFilterIcon").style.background = "url('Images/envelope.png') no-repeat center center / cover";
 		} else if (isObtain === 2) {
-			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelopeT.png') no-repeat center center / cover";
+			document.querySelector(".obtainFilterIcon").style.background = "url('Images/envelopeT.png') no-repeat center center / cover";
 		} else {
-			document.querySelector(".obtainFilterIcon").style.background = "url('public/Images/envelopeF.png') no-repeat center center / cover";
+			document.querySelector(".obtainFilterIcon").style.background = "url('Images/envelopeF.png') no-repeat center center / cover";
 		}
 		getSortedCompanyList();
 	}
